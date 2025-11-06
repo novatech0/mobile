@@ -1,0 +1,11 @@
+*.iml
+/Agrotech/.gradle/
+.idea
+/Agrotech/.idea/*
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+/Agrotech/local.properties
+/AgroTech/app/build

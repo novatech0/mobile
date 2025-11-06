@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "120580471876",
+    "project_id": "imagestorage-27f1c",
+    "storage_bucket": "imagestorage-27f1c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120580471876:android:025f67afd1f31cecdb5011",
+        "android_client_info": {
+          "package_name": "com.example.agrotech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqWllRlA141iH7T4yUMe2Fj855CYfP2r8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
