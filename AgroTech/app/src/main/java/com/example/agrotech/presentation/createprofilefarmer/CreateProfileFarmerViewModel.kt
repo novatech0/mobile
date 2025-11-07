@@ -10,7 +10,6 @@ import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
 import com.example.agrotech.common.UIState
-import com.example.agrotech.data.repository.profile.CloudStorageRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
  import com.example.agrotech.domain.profile.Profile
 import com.example.agrotech.presentation.createaccountfarmer.CreateAccountFarmerViewModel
@@ -21,8 +20,7 @@ import kotlinx.coroutines.withContext
 class CreateProfileFarmerViewModel(
     private val navController: NavController,
     private val profileRepository: ProfileRepository,
-    private val createAccountFarmerViewModel: CreateAccountFarmerViewModel,
-    private val cloudStorageRepository: CloudStorageRepository
+    private val createAccountFarmerViewModel: CreateAccountFarmerViewModel
 ) : ViewModel() {
 
     // Variables de estado para los campos de texto

@@ -21,12 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun EditProfileContent(viewModel: AdvisorProfileViewModel) {
@@ -66,18 +66,16 @@ fun EditProfileContent(viewModel: AdvisorProfileViewModel) {
                         launcher.launch("image/*")
                     }
             ) {
-                GlideImage(
-                    imageModel = {
-                        photo.value.ifBlank { R.drawable.placeholder }
-                    },
+                AsyncImage(
+                    model = photo.value,
+                    contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
                         .border(2.dp, Color.Gray, CircleShape),
-                    imageOptions = ImageOptions(
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center
-                    )
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.placeholder),
+                    error = painterResource(R.drawable.placeholder)
                 )
 
                 Box(

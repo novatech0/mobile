@@ -22,12 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun CreateProfileAdvisorScreen(viewModel: CreateProfileAdvisorViewModel) {
@@ -91,19 +91,19 @@ fun CreateProfileAdvisorScreen(viewModel: CreateProfileAdvisorViewModel) {
                 )
                 Spacer(modifier = Modifier.height(50.dp))
 
-                GlideImage(
-                    imageModel = { if (photoUrl.isBlank()) R.drawable.profile_icon else photoUrl },
+                AsyncImage(
+                    model = photoUrl,
+                    contentDescription = "Profile Icon",
                     modifier = Modifier
-                        .size(100.dp) // Adjust size as necessary
+                        .size(100.dp)
                         .padding(bottom = 8.dp)
                         .clip(CircleShape)
                         .border(2.dp, Color.Gray, CircleShape),
-                    imageOptions = ImageOptions(
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center,
-                        contentDescription = "Profile Icon"
-                    )
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.profile_icon),
+                    error = painterResource(R.drawable.profile_icon)
                 )
+
 
                 Box(
                     modifier = Modifier

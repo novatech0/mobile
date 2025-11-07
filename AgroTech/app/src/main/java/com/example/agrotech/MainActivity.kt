@@ -32,7 +32,6 @@ import com.example.agrotech.data.repository.enclosure.EnclosureRepository
 import com.example.agrotech.data.repository.farmer.FarmerRepository
 import com.example.agrotech.data.repository.notification.NotificationRepository
 import com.example.agrotech.data.repository.post.PostRepository
-import com.example.agrotech.data.repository.profile.CloudStorageRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.presentation.advisorappointmentdetail.AdvisorAppointmentDetailScreen
 import com.example.agrotech.presentation.advisorappointmentdetail.AdvisorAppointmentDetailViewModel
@@ -146,7 +145,6 @@ class MainActivity : ComponentActivity() {
                 val reviewRepository = ReviewRepository(reviewService)
                 val notificationRepository = NotificationRepository(notificationService)
                 val postRepository = PostRepository(postService)
-                val cloudStorageRepository = CloudStorageRepository()
                 val authenticationRepository = AuthenticationRepository(authenticationService, userDao)
                 val enclosureRepository = EnclosureRepository(enclosureService)
                 val animalRepository = AnimalRepository(animalService)
@@ -170,17 +168,17 @@ class MainActivity : ComponentActivity() {
                 val createAccountViewModel = CreateAccountViewModel(navController)
                 val createAccountAdvisorViewModel = CreateAccountAdvisorViewModel(navController, authenticationRepository)
                 val createAccountFarmerViewModel = CreateAccountFarmerViewModel(navController, authenticationRepository)
-                val createProfileAdvisorViewModel = CreateProfileAdvisorViewModel(navController , profileRepository, createAccountAdvisorViewModel, cloudStorageRepository)
-                val createProfileFarmerViewModel = CreateProfileFarmerViewModel(navController, profileRepository, createAccountFarmerViewModel, cloudStorageRepository)
+                val createProfileAdvisorViewModel = CreateProfileAdvisorViewModel(navController , profileRepository, createAccountAdvisorViewModel)
+                val createProfileFarmerViewModel = CreateProfileFarmerViewModel(navController, profileRepository, createAccountFarmerViewModel)
                 val confirmCreationAccountAdvisorViewModel = ConfirmCreationAccountAdvisorViewModel(navController)
                 val confirmCreationAccountFarmerViewModel = ConfirmCreationAccountFarmerViewModel(navController)
                 val notificationListViewModel = NotificationListViewModel(navController, notificationRepository)
                 val explorePostsViewModel = ExplorePostsViewModel(navController, postRepository, profileRepository, advisorRepository)
-                val farmerProfileViewModel = FarmerProfileViewModel(navController, profileRepository, cloudStorageRepository)
-                val advisorProfileViewModel = AdvisorProfileViewModel(navController, profileRepository, cloudStorageRepository)
+                val farmerProfileViewModel = FarmerProfileViewModel(navController, profileRepository)
+                val advisorProfileViewModel = AdvisorProfileViewModel(navController, profileRepository)
                 val advisorPostsViewModel = AdvisorPostsViewModel(navController, postRepository, advisorRepository)
                 val advisorPostDetailViewModel = AdvisorPostDetailViewModel(navController, postRepository)
-                val newPostViewModel = NewPostViewModel(navController, postRepository, advisorRepository, cloudStorageRepository)
+                val newPostViewModel = NewPostViewModel(navController, postRepository, advisorRepository)
                 val enclosureListViewModel = EnclosureListViewModel(navController, enclosureRepository, farmerRepository)
                 val animalListViewModel = AnimalListViewModel(navController, animalRepository, enclosureRepository)
                 val animalDetailsViewModel = AnimalDetailsViewModel(navController, animalRepository)

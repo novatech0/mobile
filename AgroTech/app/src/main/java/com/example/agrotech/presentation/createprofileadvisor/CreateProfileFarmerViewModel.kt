@@ -10,7 +10,6 @@ import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
 import com.example.agrotech.common.UIState
-import com.example.agrotech.data.repository.profile.CloudStorageRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.profile.Profile
 import com.example.agrotech.presentation.createaccountadvisor.CreateAccountAdvisorViewModel
@@ -22,7 +21,6 @@ class CreateProfileAdvisorViewModel(
     private val navController: NavController,
     private val profileRepository: ProfileRepository,
     private val createAccountAdvisorViewModel: CreateAccountAdvisorViewModel,
-    private val cloudStorageRepository: CloudStorageRepository
 ) : ViewModel() {
 
     // Variables de estado para los campos de texto

@@ -33,12 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun NewPostScreen(viewModel: NewPostViewModel) {
@@ -92,13 +93,16 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
                     }
                 }
                 else -> {
-                    GlideImage(
-                        imageModel = { image.ifBlank { R.drawable.placeholder } },
+                    AsyncImage(
+                        model = image,
+                        contentDescription = "Image",
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
                             .padding(8.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp)),
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.placeholder)
                     )
                     Box(
                         modifier = Modifier

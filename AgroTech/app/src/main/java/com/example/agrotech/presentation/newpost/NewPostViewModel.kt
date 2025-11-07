@@ -11,14 +11,12 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.post.PostRepository
-import com.example.agrotech.data.repository.profile.CloudStorageRepository
 import com.example.agrotech.domain.post.Post
 import kotlinx.coroutines.launch
 
 class NewPostViewModel(private val navController: NavController,
                        private val postRepository: PostRepository,
                        private val advisorRepository: AdvisorRepository,
-                       private val cloudStorageRepository: CloudStorageRepository
 )
     : ViewModel()
 {

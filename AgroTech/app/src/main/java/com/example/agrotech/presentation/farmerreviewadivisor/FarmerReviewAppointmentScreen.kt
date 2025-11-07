@@ -15,13 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun FarmerReviewAppointmentScreen(
@@ -67,15 +67,15 @@ fun FarmerReviewAppointmentScreen(
                 }
 
                 if (advisorImage.isNotEmpty()) {
-                    GlideImage(
+                    AsyncImage(
+                        model = advisorImage,
+                        contentDescription = null,
                         modifier = Modifier
                             .size(128.dp)
                             .clip(CircleShape),
-                        imageModel = { advisorImage.ifBlank { R.drawable.placeholder } },
-                        imageOptions = ImageOptions(
-                            contentScale = ContentScale.Crop,
-                            alignment = Alignment.Center
-                        )
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.placeholder)
                     )
                 }
 

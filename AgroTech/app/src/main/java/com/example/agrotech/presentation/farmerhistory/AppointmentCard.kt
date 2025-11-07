@@ -22,12 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun AppointmentCard(appointment: AppointmentCard, onClick: ((Long) -> Unit)? = null) {
@@ -49,15 +49,16 @@ fun AppointmentCard(appointment: AppointmentCard, onClick: ((Long) -> Unit)? = n
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GlideImage(
-                modifier = Modifier.size(64.dp).clip(CircleShape).border(4.dp, Color.Gray, CircleShape),
-                imageModel = {
-                    appointment.advisorPhoto.ifBlank { R.drawable.placeholder }
-                },
-                imageOptions = ImageOptions(
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
-                )
+            AsyncImage(
+                model = appointment.advisorPhoto,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .border(4.dp, Color.Gray, CircleShape),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(R.drawable.placeholder),
+                error = painterResource(R.drawable.placeholder)
             )
             Spacer(modifier = Modifier.width(16.dp)) // Espacio entre la imagen y el texto
             Column(

@@ -12,7 +12,6 @@ import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
 import com.example.agrotech.common.UIState
-import com.example.agrotech.data.repository.profile.CloudStorageRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.profile.Profile
 import com.example.agrotech.domain.profile.UpdateProfile
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
 class AdvisorProfileViewModel(
     private val navController: NavController,
     private val profileRepository: ProfileRepository,
-    private val cloudStorageRepository: CloudStorageRepository
 ) : ViewModel() {
     private val _state = mutableStateOf(UIState<Profile>())
     val state: State<UIState<Profile>> get() = _state
