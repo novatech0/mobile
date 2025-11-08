@@ -4,17 +4,19 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.post.PostRepository
 import com.example.agrotech.domain.post.CreatePost
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
 
-class NewPostViewModel(private val navController: NavController,
+@HiltViewModel
+class NewPostViewModel @Inject constructor(
                        private val postRepository: PostRepository,
                        private val advisorRepository: AdvisorRepository,
 )
@@ -32,11 +34,7 @@ class NewPostViewModel(private val navController: NavController,
     private val _state = mutableStateOf(UIState<Unit>())
     val state: State<UIState<Unit>> get() = _state
 
-    fun goBack() {
-        navController.popBackStack()
-    }
-
-    fun createPost() {
+    fun createPost(onSuccess: () -> Unit) {
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
             val advisor = advisorRepository.searchAdvisorByUserId(GlobalVariables.USER_ID, GlobalVariables.TOKEN)
@@ -64,7 +62,7 @@ class NewPostViewModel(private val navController: NavController,
             when (postRepository.createPost(GlobalVariables.TOKEN, post)) {
                 is Resource.Success -> {
                     _state.value = UIState(isLoading = false)
-                    navController.popBackStack()
+                    onSuccess()
                 }
                 is Resource.Error -> {
                     _state.value = UIState(message = "Error al crear la publicación")

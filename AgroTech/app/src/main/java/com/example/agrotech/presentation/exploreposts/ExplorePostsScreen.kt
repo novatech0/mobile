@@ -33,11 +33,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 
 @Composable
-fun ExplorePostsScreen(viewModel: ExplorePostsViewModel) {
+fun ExplorePostsScreen(
+    navController: NavController,
+    viewModel: ExplorePostsViewModel) {
     val state = viewModel.state.value
 
     LaunchedEffect(Unit) {
@@ -57,7 +61,7 @@ fun ExplorePostsScreen(viewModel: ExplorePostsViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -96,7 +100,7 @@ fun ExplorePostsScreen(viewModel: ExplorePostsViewModel) {
                     state.data != null -> {
                         state.data.forEach { post ->
                             PostCardItem(post = post) {
-                                viewModel.goToAdvisorDetail(post.advisorId)
+                                navController.navigate(Routes.AdvisorDetail.route + "/${post.advisorId}")
                             }
                         }
                     }

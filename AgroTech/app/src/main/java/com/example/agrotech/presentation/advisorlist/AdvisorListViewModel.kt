@@ -12,9 +12,13 @@ import com.example.agrotech.common.Routes
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class AdvisorListViewModel(private val navController: NavController, private val profileRepository: ProfileRepository,
-                           private val advisorRepository: AdvisorRepository
+@HiltViewModel
+class AdvisorListViewModel @Inject constructor(
+    private val profileRepository: ProfileRepository,
+    private val advisorRepository: AdvisorRepository
 ): ViewModel() {
 
     private val _state = mutableStateOf(UIState<List<AdvisorCard>>())
@@ -28,10 +32,6 @@ class AdvisorListViewModel(private val navController: NavController, private val
 
     private val _filter = mutableStateOf("Nombre")
     val filter: State<String> get() = _filter
-
-    fun goBack() {
-        navController.popBackStack()
-    }
 
     fun getAdvisorList() {
         _state.value = UIState(isLoading = true)
@@ -68,10 +68,6 @@ class AdvisorListViewModel(private val navController: NavController, private val
     fun filterAdvisorList() {
         val filteredList = list.value.filter(filter.value)
         _state.value = UIState(data = filteredList)
-    }
-
-    fun goToAdvisorProfile(advisorId: Long) {
-        navController.navigate(Routes.AdvisorDetail.route + "/$advisorId")
     }
 
     fun onSearchChange(search: String) {

@@ -12,8 +12,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import javax.inject.Inject
 
-class PostRepository(private val postService: PostService) {
+class PostRepository @Inject constructor(private val postService: PostService) {
 
     suspend fun getPosts(token: String): Resource<List<Post>> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {

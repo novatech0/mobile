@@ -29,10 +29,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 
 @Composable
-fun CreateAccountScreen(viewModel: CreateAccountViewModel) {
+fun CreateAccountScreen(
+    navController: NavController,
+    viewModel: CreateAccountViewModel) {
     Scaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -93,7 +97,10 @@ fun CreateAccountScreen(viewModel: CreateAccountViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 8.dp) // Espacio entre botones
-                                .clickable { viewModel.goToFormsFarmer() }
+                                .clickable {
+                                    viewModel.goToFormsFarmer()
+                                    navController.navigate(Routes.CreateAccountFarmer.route)
+                                }
                                 .background(Color(0xFFFF7121), shape = MaterialTheme.shapes.medium) // Color y forma redondeada
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
@@ -114,7 +121,10 @@ fun CreateAccountScreen(viewModel: CreateAccountViewModel) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { viewModel.goToFormsAdvisor() }
+                                .clickable {
+                                    viewModel.goToFormsAdvisor()
+                                    navController.navigate(Routes.CreateAccountAdvisor.route)
+                                }
                                 .background(Color(0xFF27AE60), shape = MaterialTheme.shapes.medium)
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
@@ -143,7 +153,7 @@ fun CreateAccountScreen(viewModel: CreateAccountViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                        .clickable { viewModel.goToLoginScreen() },
+                        .clickable { navController.navigate(Routes.SignIn.route) },
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Black,
                     fontSize = 14.sp,

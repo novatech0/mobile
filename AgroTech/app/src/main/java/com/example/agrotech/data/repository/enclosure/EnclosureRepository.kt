@@ -7,8 +7,9 @@ import com.example.agrotech.domain.enclosure.Enclosure
 import com.example.agrotech.domain.enclosure.toEnclosureDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class EnclosureRepository(private val enclosureService: EnclosureService) {
+class EnclosureRepository @Inject constructor(private val enclosureService: EnclosureService) {
 
     suspend fun getEnclosuresByFarmerId(token: String, farmerId: Long): Resource<List<Enclosure>> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {

@@ -11,17 +11,21 @@ import com.example.agrotech.common.Routes
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.authentication.AuthenticationRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class WelcomeViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class WelcomeViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
     private val advisorRepository: AdvisorRepository
-): ViewModel()  {
+) : ViewModel() {
 
     private val _state = mutableStateOf(UIState<Unit>())
     val state: State<UIState<Unit>> get() = _state
+
+    private val _navigationRoute = mutableStateOf<String?>(null)
+    val navigationRoute: State<String?> get() = _navigationRoute
 
     fun checkUser() {
         _state.value = UIState(isLoading = true)
@@ -31,36 +35,26 @@ class WelcomeViewModel(
                     GlobalVariables.TOKEN = result.data?.token ?: ""
                     GlobalVariables.USER_ID = result.data?.id ?: 0
                     if (GlobalVariables.TOKEN.isNotBlank() && GlobalVariables.USER_ID != 0L) {
-                        val isAdvisor = advisorRepository.isUserAdvisor(GlobalVariables.USER_ID, GlobalVariables.TOKEN)
-                        if (isAdvisor) {
-                            goToAdvisorHomeScreen()
+                        val isAdvisor = advisorRepository.isUserAdvisor(
+                            GlobalVariables.USER_ID,
+                            GlobalVariables.TOKEN
+                        )
+                        _navigationRoute.value = if (isAdvisor) {
+                            Routes.AdvisorHome.route
                         } else {
-                            goToFarmerHomeScreen()
+                            Routes.FarmerHome.route
                         }
                     }
-                    _state.value = UIState(message = "Error al recuperar usuario")
+                    _state.value = UIState(isLoading = false)
                 }
+
                 is Resource.Error -> {
                     _state.value = UIState(isLoading = false)
                 }
             }
         }
     }
-
-    fun goToLoginScreen() {
-        navController.navigate(Routes.SignIn.route)
+    fun clearNavigation() {
+        _navigationRoute.value = null
     }
-
-    private fun goToFarmerHomeScreen() {
-        navController.navigate(Routes.FarmerHome.route)
-    }
-
-    private fun goToAdvisorHomeScreen() {
-        navController.navigate(Routes.AdvisorHome.route)
-    }
-
-    fun goToSignUpScreen() {
-        navController.navigate(Routes.SignUp.route)
-    }
-
 }

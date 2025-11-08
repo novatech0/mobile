@@ -12,8 +12,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import javax.inject.Inject
 
-class ProfileRepository(private val profileService: ProfileService) {
+class ProfileRepository @Inject constructor(private val profileService: ProfileService) {
     suspend fun createProfile(token: String, profile: CreateProfile, isAdvisor: Boolean): Resource<Profile> = withContext(Dispatchers.IO) {
         if (token.isBlank()) return@withContext Resource.Error("Un token es requerido")
 

@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.animallist
 
-import android.widget.TextView
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,10 +44,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 import com.example.agrotech.domain.animal.Animal
 
 @Composable
-fun AnimalListScreen(viewModel: AnimalListViewModel, enclosureId: Long) {
+fun AnimalListScreen(
+    navController: NavController,
+    viewModel: AnimalListViewModel,
+    enclosureId: Long)
+{
     val state = viewModel.state
     val enclosure = viewModel.enclosure
     val showAnimalDialog = viewModel.showAnimalDialog
@@ -87,7 +92,7 @@ fun AnimalListScreen(viewModel: AnimalListViewModel, enclosureId: Long) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -148,7 +153,9 @@ fun AnimalListScreen(viewModel: AnimalListViewModel, enclosureId: Long) {
                             )
                         },
                         onClick = {
-                            viewModel.deleteEnclosure(enclosureId)
+                            viewModel.deleteEnclosure(enclosureId, onSuccess = {
+                                navController.popBackStack()
+                            })
                             viewModel.setExpanded(false)
                         }
                     )
@@ -181,7 +188,7 @@ fun AnimalListScreen(viewModel: AnimalListViewModel, enclosureId: Long) {
                                 AnimalListItem(
                                     animal = animal,
                                     healthStatusTranslation = healthStatusTranslation,
-                                    onClick = { viewModel.goToAnimalDetails(animal.id) }
+                                    onClick = { navController.navigate(Routes.AnimalDetail.route + "/${animal.id}") }
                                 )
                             }
                         }

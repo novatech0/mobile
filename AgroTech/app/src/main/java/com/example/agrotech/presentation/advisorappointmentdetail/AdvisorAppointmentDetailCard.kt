@@ -1,7 +1,6 @@
 package com.example.agrotech.presentation.advisorappointmentdetail
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.example.agrotech.domain.appointment.Appointment
+import com.example.agrotech.domain.appointment.AvailableDate
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,7 +35,7 @@ import java.util.Locale
 
 @Composable
 fun AdvisorAppointmentDetailCard(
-    appointment: Appointment,
+    availableDate: AvailableDate,
     farmerName: String,
     farmerImageUrl: String
 ) {
@@ -90,7 +89,7 @@ fun AdvisorAppointmentDetailCard(
                 )
 
                 Text(
-                    text = "${formatDateShort(appointment.scheduledDate)} (${formatTime(appointment.startTime)} - ${formatTime(appointment.endTime)})",
+                    text = "${formatDateShort(availableDate.scheduledDate)} (${formatTime(availableDate.startTime)} - ${formatTime(availableDate.endTime)})",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF06204A)

@@ -12,10 +12,15 @@ import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.appointment.AvailableDateRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AdvisorDetailViewModel(private val navController: NavController, private val profileRepository: ProfileRepository,
-                             private val advisorRepository: AdvisorRepository, private val availableDateRepository: AvailableDateRepository
+@HiltViewModel
+class AdvisorDetailViewModel @Inject constructor(
+    private val profileRepository: ProfileRepository,
+    private val advisorRepository: AdvisorRepository,
+    private val availableDateRepository: AvailableDateRepository
 ): ViewModel() {
 
     private val _state = mutableStateOf(UIState<AdvisorDetail>())
@@ -27,10 +32,6 @@ class AdvisorDetailViewModel(private val navController: NavController, private v
 
     fun clearSnackbarMessage() {
         _snackbarMessage.value = null
-    }
-
-    fun goBack() {
-        navController.popBackStack()
     }
 
     fun getAdvisorDetail(advisorId: Long) {
@@ -68,22 +69,20 @@ class AdvisorDetailViewModel(private val navController: NavController, private v
         }
     }
 
-    fun goToReviewList(advisorId: Long) {
-        navController.navigate(Routes.ReviewList.route + "/$advisorId")
-    }
-
-    fun goToNewAppointment(advisorId: Long) {
+    fun goToNewAppointment(advisorId: Long, onNavigate: (String) -> Unit) {
         viewModelScope.launch {
             val result = availableDateRepository.getAvailableDatesByAdvisor(advisorId, GlobalVariables.TOKEN)
             if (result is Resource.Success) {
                 val availableDates = result.data
                 if (availableDates.isNullOrEmpty()) {
                     _snackbarMessage.value = "No hay fechas disponibles"
+                    onNavigate("") // no navega porque la ruta está vacía
                 } else {
-                    navController.navigate(Routes.NewAppointment.route + "/$advisorId")
+                    onNavigate(Routes.NewAppointment.route + "/$advisorId")
                 }
             } else {
                 _state.value = UIState(message = "Error obteniendo fechas disponibles")
+                onNavigate("") // no navega
             }
         }
     }

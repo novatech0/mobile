@@ -23,29 +23,38 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 
 
 @Composable
-fun WelcomeScreen(viewModel: WelcomeViewModel) {
+fun WelcomeScreen(
+    navController: NavController,
+    viewModel: WelcomeViewModel
+) {
     val state = viewModel.state.value
+    val navigationRoute = viewModel.navigationRoute.value
 
     LaunchedEffect(Unit) {
         viewModel.checkUser()
     }
 
-    Scaffold(
-        modifier = Modifier.background(Color.White)
-    ) { paddingValues ->
+    LaunchedEffect(navigationRoute) {
+        navigationRoute?.let { route ->
+            navController.navigate(route) {
+                popUpTo(Routes.Welcome.route) { inclusive = true }
+            }
+            viewModel.clearNavigation()
+        }
+    }
+
+    Scaffold(modifier = Modifier.background(Color.White)) { paddingValues ->
         if (state.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-        }
-        else {
+        } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -55,7 +64,7 @@ fun WelcomeScreen(viewModel: WelcomeViewModel) {
             ) {
                 Image(
                     bitmap = ImageBitmap.imageResource(id = R.drawable.welcome),
-                    contentDescription = "Welcome image",
+                    contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .fillMaxHeight(0.5f),
@@ -70,8 +79,7 @@ fun WelcomeScreen(viewModel: WelcomeViewModel) {
                     style = MaterialTheme.typography.bodyLarge,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 40.sp
+                    textAlign = TextAlign.Center
                 )
 
                 Text(
@@ -94,21 +102,21 @@ fun WelcomeScreen(viewModel: WelcomeViewModel) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Button(
-                        onClick = { viewModel.goToLoginScreen() },
+                        onClick = { navController.navigate(Routes.SignIn.route) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(Color(0xFF092C4C))
                     ) {
-                        Text(text = "Iniciar sesión", color = Color.White)
+                        Text("Iniciar sesión", color = Color.White)
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
                     OutlinedButton(
-                        onClick = { viewModel.goToSignUpScreen() },
+                        onClick = { navController.navigate(Routes.SignUp.route) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(Color.White)
                     ) {
-                        Text(text = "Crear cuenta", color = Color.Black)
+                        Text("Crear cuenta", color = Color.Black)
                     }
                 }
             }

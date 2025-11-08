@@ -12,10 +12,12 @@ import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.enclosure.EnclosureRepository
 import com.example.agrotech.data.repository.farmer.FarmerRepository
 import com.example.agrotech.domain.enclosure.Enclosure
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class EnclosureListViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class EnclosureListViewModel @Inject constructor(
     private val enclosureRepository: EnclosureRepository,
     private val farmerRepository: FarmerRepository
 ): ViewModel() {
@@ -74,15 +76,6 @@ class EnclosureListViewModel(
                 getEnclosures()
             }
         }
-    }
-
-
-    fun goBack() {
-        navController.popBackStack()
-    }
-
-    fun goToAnimals(enclosureId: Long) {
-        navController.navigate(Routes.AnimalList.route + "/$enclosureId")
     }
 
     fun showDialog() {

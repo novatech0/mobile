@@ -13,10 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.agrotech.domain.appointment.Appointment
+import com.example.agrotech.domain.appointment.AvailableDate
 
 @Composable
 fun AppointmentCardAdvisorList(
     appointments: List<Appointment>,
+    availableDates: List<AvailableDate>,
     farmerNames: Map<Long, String>,
     farmerImagesUrl: Map<Long, String>,
     onAppointmentClick: (Appointment) -> Unit // Pass a lambda for navigation
@@ -33,13 +35,16 @@ fun AppointmentCardAdvisorList(
             appointments.forEachIndexed { index, appointment ->
                 val farmerName = farmerNames[appointment.id] ?: "Nombre no disponible"
                 val farmerImageUrl = farmerImagesUrl[appointment.id] ?: ""
+                val availableDate = availableDates.find { it.id == appointment.availableDateId }
 
-                AppointmentCardAdvisor(
-                    appointment = appointment,
-                    farmerName = farmerName,
-                    farmerImageUrl = farmerImageUrl,
-                    onClick = { onAppointmentClick(appointment) } // Pass the click action
-                )
+                if (availableDate != null) {
+                    AppointmentCardAdvisor(
+                        availableDate = availableDate,
+                        farmerName = farmerName,
+                        farmerImageUrl = farmerImageUrl,
+                        onClick = { onAppointmentClick(appointment) } // Pass the click action
+                    )
+                }
 
                 if (index < appointments.size - 1) {
                     HorizontalDivider(

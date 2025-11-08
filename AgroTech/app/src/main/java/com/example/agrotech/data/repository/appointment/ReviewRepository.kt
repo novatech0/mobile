@@ -8,8 +8,9 @@ import com.example.agrotech.domain.appointment.Review
 import com.example.agrotech.domain.appointment.UpdateReview
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class ReviewRepository(private val reviewService: ReviewService) {
+class ReviewRepository @Inject constructor(private val reviewService: ReviewService) {
     suspend fun getAdvisorReviewsList(advisorId: Long, token: String): Resource<List<Review>> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {
             return@withContext Resource.Error(message = "Un token es requerido")

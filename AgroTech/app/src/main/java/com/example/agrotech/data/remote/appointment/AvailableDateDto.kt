@@ -8,6 +8,7 @@ data class AvailableDateDto(
     val scheduledDate: String,
     val startTime: String,
     val endTime: String,
+    val status: String
 )
 
-fun AvailableDateDto.toAvailableDate() = AvailableDate(id, advisorId, scheduledDate, startTime, endTime)
+fun AvailableDateDto.toAvailableDate() = AvailableDate(id, advisorId, scheduledDate, startTime, endTime, status)

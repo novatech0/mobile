@@ -29,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -42,13 +41,15 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 import com.example.agrotech.presentation.farmerhistory.AppointmentCard
 
 @Composable
 fun FarmerAppointmentDetailScreen(
+    navController: NavController,
     viewModel: FarmerAppointmentDetailViewModel,
     appointmentId: Long,
 ) {
@@ -91,7 +92,10 @@ fun FarmerAppointmentDetailScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = { viewModel.goBack() }) {
+                    IconButton(onClick = {
+                        viewModel.goBack()
+                        navController.popBackStack()
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Volver"
@@ -230,7 +234,9 @@ fun FarmerAppointmentDetailScreen(
             if (showCancelDialog) {
                 CancelAppointmentDialog(
                     onDismiss = { viewModel.onDismissCancelDialog() },
-                    onConfirm = { reason -> viewModel.cancelAppointment(appointmentId, reason) }
+                    onConfirm = { reason -> viewModel.cancelAppointment(appointmentId, reason, onSuccess = {
+                        navController.navigate(Routes.CancelAppointmentConfirmation.route)
+                    }) }
                 )
             }
         }

@@ -12,19 +12,18 @@ import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.post.PostRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ExplorePostsViewModel(private val navController: NavController,
+@HiltViewModel
+class ExplorePostsViewModel @Inject constructor(
                             private val postRepository: PostRepository,
                             private val profileRepository: ProfileRepository,
                             private val advisorRepository: AdvisorRepository
 ) : ViewModel() {
     private val _state = mutableStateOf(UIState<List<PostCard>>())
     val state: State<UIState<List<PostCard>>> get() = _state
-
-    fun goBack() {
-        navController.popBackStack()
-    }
 
     fun getPostList() {
         _state.value = UIState(isLoading = true)
@@ -66,9 +65,4 @@ class ExplorePostsViewModel(private val navController: NavController,
             }
         }
     }
-
-    fun goToAdvisorDetail(advisorId: Long) {
-        navController.navigate(Routes.AdvisorDetail.route + "/$advisorId")
-    }
-
 }

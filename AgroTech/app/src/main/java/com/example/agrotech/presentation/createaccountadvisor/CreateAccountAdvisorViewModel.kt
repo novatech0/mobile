@@ -10,15 +10,19 @@ import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.authentication.AuthenticationRepository
+import com.example.agrotech.data.repository.authentication.RegistrationDataRepository
 import com.example.agrotech.domain.profile.CreateProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import javax.inject.Inject
 
-class CreateAccountAdvisorViewModel(
-    private val navController: NavController,
-    private val authenticationRepository: AuthenticationRepository
+@HiltViewModel
+class CreateAccountAdvisorViewModel @Inject constructor(
+    private val authenticationRepository: AuthenticationRepository,
+    private val registrationDataRepository: RegistrationDataRepository
 ) : ViewModel() {
 
     // Variables de estado para los campos de texto
@@ -38,19 +42,15 @@ class CreateAccountAdvisorViewModel(
         private set
 
     // Function to create a Profile object with the current values
-    fun getProfile(): CreateProfile {
-        return CreateProfile(
-            userId = GlobalVariables.USER_ID,
-            firstName = firstName.value,
-            lastName = lastName.value,
-            city = city.value,
-            country = country.value,
-            birthDate = birthDate.value,
-            description = "",
-            occupation = "",
-            photo = File(""), // archivo vacio temporal
-            experience = 0
-        )
+    fun saveUserData() {
+        registrationDataRepository.apply {
+            userId = GlobalVariables.USER_ID
+            firstName = this@CreateAccountAdvisorViewModel.firstName.value
+            lastName = this@CreateAccountAdvisorViewModel.lastName.value
+            city = this@CreateAccountAdvisorViewModel.city.value
+            country = this@CreateAccountAdvisorViewModel.country.value
+            birthDate = this@CreateAccountAdvisorViewModel.birthDate.value
+        }
     }
 
     private val _state = mutableStateOf(UIState<Unit>())
@@ -64,15 +64,7 @@ class CreateAccountAdvisorViewModel(
         _snackbarMessage.value = null
     }
 
-    fun goToLoginScreen() {
-        navController.navigate(Routes.SignIn.route)
-    }
-
-    private fun goToCreateProfileAdvisorScreen() {
-        navController.navigate(Routes.CreateProfileAdvisor.route)
-    }
-
-    fun signUp() {
+    fun signUp(onSuccess: () -> Unit) {
         viewModelScope.launch {
             _state.value = UIState(isLoading = true)
             val emailValue = email.value
@@ -81,9 +73,9 @@ class CreateAccountAdvisorViewModel(
             val result = authenticationRepository.signUp(emailValue, passwordValue, roles)
             if (result is Resource.Success) {
                 _state.value = UIState(data = Unit)
-
+                saveUserData()
                 // Sign in the user to obtain the token
-                signIn(emailValue, passwordValue)
+                signIn(emailValue, passwordValue, onSuccess)
             } else {
                 _state.value = UIState(message = result.message ?: "Error al registrarse")
                 _snackbarMessage.value = result.message ?: "Error al registrarse"
@@ -91,7 +83,7 @@ class CreateAccountAdvisorViewModel(
         }
     }
 
-    private fun signIn(email: String, password: String) {
+    private fun signIn(email: String, password: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             val result = authenticationRepository.signIn(email, password)
             if (result is Resource.Success) {
@@ -100,7 +92,7 @@ class CreateAccountAdvisorViewModel(
                     GlobalVariables.USER_ID = result.data.id
                     GlobalVariables.TOKEN = token
                     withContext(Dispatchers.Main) {
-                        goToCreateProfileAdvisorScreen()
+                        onSuccess()
                     }
                 } else {
                     _state.value = UIState(message = "Error al obtener el token")

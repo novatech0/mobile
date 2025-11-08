@@ -25,12 +25,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 import java.io.File
 
 @Composable
-fun CreateProfileFarmerScreen(viewModel: CreateProfileFarmerViewModel) {
+fun CreateProfileFarmerScreen(
+    navController: NavController,
+    viewModel: CreateProfileFarmerViewModel) {
     val state by viewModel.state
     val snackbarMessage by viewModel.snackbarMessage
     val snackbarHostState = remember { SnackbarHostState() }
@@ -156,7 +160,9 @@ fun CreateProfileFarmerScreen(viewModel: CreateProfileFarmerViewModel) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .clickable {
-                            viewModel.createProfile()
+                            viewModel.createProfile(
+                                { navController.navigate(Routes.ConfirmCreationAccountFarmer.route) }
+                            )
                         }
                         .background(Color(0xFF092C4C), shape = MaterialTheme.shapes.medium)
                         .padding(16.dp),

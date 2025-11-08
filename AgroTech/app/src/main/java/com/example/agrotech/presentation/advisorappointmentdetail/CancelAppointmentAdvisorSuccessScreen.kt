@@ -23,9 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 
 @Composable
-fun CancelAppointmentAdvisorSuccessScreen(viewModel: AdvisorAppointmentDetailViewModel) {
+fun CancelAppointmentAdvisorSuccessScreen(
+    navController: NavController,
+    viewModel: AdvisorAppointmentDetailViewModel) {
     Scaffold { paddingValues ->
         Box(
             modifier = Modifier
@@ -34,7 +38,7 @@ fun CancelAppointmentAdvisorSuccessScreen(viewModel: AdvisorAppointmentDetailVie
         ) {
             // Botón de retroceso en la parte superior izquierda
             IconButton(
-                onClick = { viewModel.goToAppointments() },
+                onClick = { navController.navigate(Routes.AppointmentsAdvisorList.route) },
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(16.dp)

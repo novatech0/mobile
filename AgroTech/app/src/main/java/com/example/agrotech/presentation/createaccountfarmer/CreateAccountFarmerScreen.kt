@@ -27,11 +27,15 @@ import android.icu.text.SimpleDateFormat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun CreateAccountFarmerScreen(viewModel: CreateAccountFarmerViewModel) {
+fun CreateAccountFarmerScreen(
+    navController: NavController,
+    viewModel: CreateAccountFarmerViewModel) {
     val state by viewModel.state
     val snackbarMessage by viewModel.snackbarMessage
     val snackbarHostState = remember { SnackbarHostState() }
@@ -213,7 +217,9 @@ fun CreateAccountFarmerScreen(viewModel: CreateAccountFarmerViewModel) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .clickable {
-                            viewModel.signUp()
+                            viewModel.signUp({
+                                navController.navigate(Routes.CreateProfileFarmer.route)
+                            })
                         }
                         .background(Color(0xFF092C4C), shape = MaterialTheme.shapes.medium)
                         .padding(16.dp),
@@ -238,7 +244,7 @@ fun CreateAccountFarmerScreen(viewModel: CreateAccountFarmerViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                        .clickable { viewModel.goToLoginScreen() },
+                        .clickable { navController.navigate(Routes.SignIn.route) },
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Black,
                     fontSize = 14.sp,

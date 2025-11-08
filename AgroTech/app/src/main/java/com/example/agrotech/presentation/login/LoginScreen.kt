@@ -28,11 +28,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel) {
     val state = viewModel.state.value
     val snackbarHostState = remember { SnackbarHostState() }
     val email = viewModel.email.value
@@ -103,7 +107,19 @@ fun LoginScreen(viewModel: LoginViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { viewModel.signIn() },
+                    onClick = { viewModel.signIn(
+                        onSuccess = { isAdvisor ->
+                            if (isAdvisor) {
+                                navController.navigate(Routes.AdvisorHome.route) {
+                                    popUpTo(Routes.SignIn.route) { inclusive = true }
+                                }
+                            } else {
+                                navController.navigate(Routes.FarmerHome.route) {
+                                    popUpTo(Routes.SignIn.route) { inclusive = true }
+                                }
+                            }
+                        }
+                    ) },
                     enabled = email.isNotEmpty() && password.isNotEmpty(),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -126,7 +142,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
                         .fillMaxWidth()
                         .padding(16.dp)
                         .clickable {
-                            viewModel.goToSignUpScreen()
+                            navController.navigate(Routes.SignUp.route)
                         },
                     color = Color.Black,
                     fontSize = 14.sp,

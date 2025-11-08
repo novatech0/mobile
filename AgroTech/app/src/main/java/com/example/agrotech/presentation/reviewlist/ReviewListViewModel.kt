@@ -13,9 +13,13 @@ import com.example.agrotech.data.repository.farmer.FarmerRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.data.repository.appointment.ReviewRepository
 import com.example.agrotech.presentation.advisorlist.AdvisorCard
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ReviewListViewModel(private val navController: NavController, private val reviewRepository: ReviewRepository,
+@HiltViewModel
+class ReviewListViewModel @Inject constructor(
+    private val reviewRepository: ReviewRepository,
                           private val profileRepository: ProfileRepository,
                           private val farmerRepository: FarmerRepository,
                           private val advisorRepository: AdvisorRepository
@@ -25,10 +29,6 @@ class ReviewListViewModel(private val navController: NavController, private val 
 
     private val _advisorCard = mutableStateOf(UIState<AdvisorCard>())
     val advisorCard: State<UIState<AdvisorCard>> get() = _advisorCard
-
-    fun goBack() {
-        navController.popBackStack()
-    }
 
     fun getAdvisorDetail(advisorId: Long) {
         _advisorCard.value = UIState(isLoading = true)

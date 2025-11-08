@@ -38,11 +38,15 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
 
 @Composable
-fun ReviewListScreen(viewModel: ReviewListViewModel, advisorId: Long) {
+fun ReviewListScreen(
+    navController: NavController,
+    viewModel: ReviewListViewModel,
+    advisorId: Long) {
     val state = viewModel.state.value
     val advisor = viewModel.advisorCard.value
 
@@ -61,7 +65,7 @@ fun ReviewListScreen(viewModel: ReviewListViewModel, advisorId: Long) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,

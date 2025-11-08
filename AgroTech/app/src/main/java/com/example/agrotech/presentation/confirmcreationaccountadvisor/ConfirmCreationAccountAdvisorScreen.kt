@@ -14,9 +14,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 
 @Composable
-fun ConfirmCreationAccountAdvisorScreen(viewModel: ConfirmCreationAccountAdvisorViewModel) {
+fun ConfirmCreationAccountAdvisorScreen(navController: NavController) {
     Scaffold { paddingValues ->
         Box(
             modifier = Modifier
@@ -59,7 +61,7 @@ fun ConfirmCreationAccountAdvisorScreen(viewModel: ConfirmCreationAccountAdvisor
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .clickable {
-                            viewModel.goToAdvisorHomeScreen()
+                            navController.navigate(Routes.AdvisorHome.route)
                         }
                         .background(Color(0xFF092C4C), shape = RoundedCornerShape(8.dp)) // Esquinas redondeadas
                         .padding(16.dp),

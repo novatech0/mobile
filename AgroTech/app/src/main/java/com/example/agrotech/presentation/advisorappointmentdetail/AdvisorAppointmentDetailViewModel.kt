@@ -9,18 +9,23 @@ import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
 import com.example.agrotech.data.repository.appointment.AppointmentRepository
+import com.example.agrotech.data.repository.appointment.AvailableDateRepository
 import com.example.agrotech.data.repository.appointment.ReviewRepository
 import com.example.agrotech.data.repository.authentication.AuthenticationRepository
 import com.example.agrotech.data.repository.farmer.FarmerRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.appointment.Appointment
+import com.example.agrotech.domain.appointment.AvailableDate
 import com.example.agrotech.domain.authentication.AuthenticationResponse
 import com.example.agrotech.domain.profile.Profile
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AdvisorAppointmentDetailViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class AdvisorAppointmentDetailViewModel @Inject constructor(
     private val appointmentRepository: AppointmentRepository,
+    private val availableDateRepository: AvailableDateRepository,
     private val profileRepository: ProfileRepository,
     private val farmerRepository: FarmerRepository,
     private val reviewRepository: ReviewRepository,
@@ -30,8 +35,11 @@ class AdvisorAppointmentDetailViewModel(
     val appointmentDetail = mutableStateOf<Appointment?>(null)
     val isLoading = mutableStateOf(false)
     var errorMessage = mutableStateOf<String?>(null)
-
     val farmerProfile = mutableStateOf<Profile?>(null)
+
+    private val _availableDate = mutableStateOf<AvailableDate?>(null)
+    val availableDate: State<AvailableDate?> get() = _availableDate
+
 
     private val _expanded = mutableStateOf(false)
     val expanded: State<Boolean> get() = _expanded
@@ -44,6 +52,7 @@ class AdvisorAppointmentDetailViewModel(
                 val appointmentResult = appointmentRepository.getAppointmentById(appointmentId, GlobalVariables.TOKEN)
                 if (appointmentResult is Resource.Success) {
                     appointmentDetail.value = appointmentResult.data
+
 
                     val farmerId = appointmentResult.data?.farmerId
                     if (farmerId != null) {
@@ -72,12 +81,15 @@ class AdvisorAppointmentDetailViewModel(
         viewModelScope.launch {
             try {
                 val appointmentResult = appointmentRepository.getAppointmentById(appointmentId, GlobalVariables.TOKEN)
+                val availableDateResult = availableDateRepository.getAvailableDateById(
+                    appointmentResult.data?.availableDateId ?: 0L, GlobalVariables.TOKEN)
+                val advisorId = if (availableDateResult is Resource.Success) availableDateResult.data?.advisorId ?: 0 else 0
                 if (appointmentResult is Resource.Success) {
                     val appointment = appointmentResult.data
-                    val advisorId = appointment?.advisorId
+                    val advisorId = advisorId
                     val farmerId = appointment?.farmerId
 
-                    if (advisorId != null && farmerId != null) {
+                    if (farmerId != null) {
                         val reviewResult = reviewRepository.getReviewByAdvisorIdAndFarmerId(advisorId, farmerId, GlobalVariables.TOKEN)
                         if (reviewResult is Resource.Success) {
                             val message = reviewResult.data?.comment
@@ -98,33 +110,14 @@ class AdvisorAppointmentDetailViewModel(
         }
     }
 
-    private fun goToWelcomeSection() {
-        navController.navigate(Routes.Welcome.route)
-    }
-
     fun setExpanded(value: Boolean) {
         _expanded.value = value
     }
 
-    fun goToAppointments() {
-        navController.navigate(Routes.AppointmentsAdvisorList.route)
-    }
-
-    fun goToProfile() {
-        navController.navigate(Routes.AdvisorProfile.route)
-    }
-
-    fun goBack() {
-        navController.popBackStack()
-    }
-
-    private fun goToCancelAppointmentSuccess() {
-        navController.navigate(Routes.ConfirmDeletionAppointmentAdvisor.route)
-    }
-
-    suspend fun onCancelAppointmentClick() {
-        appointmentRepository.deleteAppointment(appointmentDetail.value?.id ?: 0L, GlobalVariables.TOKEN)
-        goToCancelAppointmentSuccess()
+    suspend fun cancelAppointment() {
+        appointmentDetail.value?.id?.let {
+            appointmentRepository.deleteAppointment(it, GlobalVariables.TOKEN)
+        }
     }
 
     fun signOut() {
@@ -136,7 +129,6 @@ class AdvisorAppointmentDetailViewModel(
                 token = GlobalVariables.TOKEN
             )
             authenticationRepository.deleteUser(authResponse)
-            goToWelcomeSection()
         }
     }
 }

@@ -25,12 +25,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
 import java.io.File
 
 @Composable
-fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long) {
+fun AdvisorPostDetailScreen(
+    navController: NavController,
+    viewModel: AdvisorPostDetailViewModel, postId: Long) {
     LaunchedEffect(Unit) {
         viewModel.getPost(postId)
     }
@@ -69,7 +72,7 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -110,7 +113,9 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
                             )
                         },
                         onClick = {
-                            viewModel.deletePost(postId)
+                            viewModel.deletePost(postId, onSuccess = {
+                                navController.popBackStack()
+                            })
                         }
                     )
                 }

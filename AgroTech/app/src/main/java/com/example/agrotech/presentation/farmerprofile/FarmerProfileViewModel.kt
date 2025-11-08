@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
@@ -13,12 +12,13 @@ import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.profile.Profile
 import com.example.agrotech.domain.profile.UpdateProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
 
-
-class FarmerProfileViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class FarmerProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
     private val _state = mutableStateOf(UIState<Profile>())
@@ -52,10 +52,6 @@ class FarmerProfileViewModel(
 
     private val _photoUrl = mutableStateOf("")
     val photoUrl: State<String> get() = _photoUrl
-
-    fun goToHome() {
-        navController.navigate(Routes.FarmerHome.route)
-    }
 
     fun getFarmerProfile() {
         _state.value = UIState(isLoading = true)

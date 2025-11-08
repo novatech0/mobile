@@ -40,11 +40,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 
 @Composable
-fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
+fun AdvisorDetailScreen(
+    navController: NavController,
+    viewModel: AdvisorDetailViewModel,
+    advisorId: Long) {
     val state = viewModel.state.value
     val snackbarMessage by viewModel.snackbarMessage
     val snackbarHostState = remember { SnackbarHostState() }
@@ -70,7 +75,7 @@ fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -127,7 +132,7 @@ fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
                                 disabledContainerColor = Color(0xFFBAC2CB)
                             ),
                             onClick = {
-                                viewModel.goToReviewList(advisorId)
+                                navController.navigate(Routes.ReviewList.route + "/$advisorId")
                             }) {
                             Text(
                                 modifier = Modifier.padding(16.dp),
@@ -227,7 +232,13 @@ fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
                     Button(modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                        onClick = { viewModel.goToNewAppointment(advisorId) },
+                        onClick = {
+                            viewModel.goToNewAppointment(advisorId) { route ->
+                                if (route.isNotBlank()) {
+                                    navController.navigate(route)
+                                }
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF3E64FF), // Color de fondo del botón
                             contentColor = Color.White)) {

@@ -32,12 +32,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 import com.example.agrotech.domain.post.Post
 
 @Composable
-fun AdvisorPostsScreen(viewModel: AdvisorPostsViewModel) {
+fun AdvisorPostsScreen(
+    navController: NavController,
+    viewModel: AdvisorPostsViewModel) {
     val state = viewModel.state.value
 
     LaunchedEffect(Unit) {
@@ -54,7 +58,7 @@ fun AdvisorPostsScreen(viewModel: AdvisorPostsViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -74,7 +78,7 @@ fun AdvisorPostsScreen(viewModel: AdvisorPostsViewModel) {
                     )
                 }
                 IconButton(
-                    onClick = { viewModel.goToCreatePost() }
+                    onClick = { navController.navigate(Routes.NewPost.route) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -102,7 +106,7 @@ fun AdvisorPostsScreen(viewModel: AdvisorPostsViewModel) {
                     }
                     items(count = it.size, itemContent = { index ->
                         PostItem(post = it[index], onClick = {
-                            viewModel.goToPostDetails(it[index].id)
+                            navController.navigate(Routes.AdvisorPostDetail.route + "/${it[index].id}")
                         })
                     })
                 }

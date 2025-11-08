@@ -14,12 +14,13 @@ import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.profile.Profile
 import com.example.agrotech.domain.profile.UpdateProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
 
-
-class AdvisorProfileViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class AdvisorProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
     private val _state = mutableStateOf(UIState<Profile>())
@@ -59,10 +60,6 @@ class AdvisorProfileViewModel(
 
     private val _experience = mutableIntStateOf(0)
     val experience: State<Int> get() = _experience
-
-    fun goToHome() {
-        navController.navigate(Routes.AdvisorHome.route)
-    }
 
     fun getAdvisorProfile() {
         _state.value = UIState(isLoading = true)

@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.newpost
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -39,12 +37,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
 import java.io.File
 
 @Composable
-fun NewPostScreen(viewModel: NewPostViewModel) {
+fun NewPostScreen(navController: NavController, viewModel: NewPostViewModel) {
     val state = viewModel.state.value
     val title = viewModel.title.value
     val description = viewModel.description.value
@@ -74,7 +73,7 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -168,7 +167,7 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
-                            viewModel.createPost()
+                            viewModel.createPost(onSuccess = { navController.popBackStack() })
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {

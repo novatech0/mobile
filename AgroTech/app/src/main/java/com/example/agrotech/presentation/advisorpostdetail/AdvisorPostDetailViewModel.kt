@@ -11,11 +11,14 @@ import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.post.PostRepository
 import com.example.agrotech.domain.post.Post
 import com.example.agrotech.domain.post.UpdatePost
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
 
-class AdvisorPostDetailViewModel(
-    private val navController: NavController, private val postRepository: PostRepository
+@HiltViewModel
+class AdvisorPostDetailViewModel @Inject constructor(
+    private val postRepository: PostRepository
 ): ViewModel() {
     private val _state = mutableStateOf(UIState<Post>())
     val state: State<UIState<Post>> get() = _state
@@ -37,10 +40,6 @@ class AdvisorPostDetailViewModel(
 
     fun setExpanded(value: Boolean) {
         _expanded.value = value
-    }
-
-    fun goBack() {
-        navController.popBackStack()
     }
 
     fun getPost(postId: Long) {
@@ -97,14 +96,14 @@ class AdvisorPostDetailViewModel(
         }
     }
 
-    fun deletePost(postId: Long){
+    fun deletePost(postId: Long, onSuccess: () -> Unit){
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
             when (postRepository.deletePost(GlobalVariables.TOKEN, postId)) {
                 is Resource.Success -> {
                     _state.value = UIState(data = null)
                     _expanded.value = false
-                    navController.popBackStack()
+                    onSuccess()
                 }
                 is Resource.Error -> {
                     _state.value = UIState(message = "Error al eliminar la publicación")

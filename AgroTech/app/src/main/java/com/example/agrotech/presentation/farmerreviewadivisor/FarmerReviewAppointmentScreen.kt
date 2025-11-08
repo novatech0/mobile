@@ -5,7 +5,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.*
@@ -21,11 +20,13 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
 
 @Composable
 fun FarmerReviewAppointmentScreen(
+    navController: NavController,
     viewModel: FarmerReviewAppointmentViewModel,
     appointmentId: Long
 ) {
@@ -59,7 +60,7 @@ fun FarmerReviewAppointmentScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    IconButton(onClick = { viewModel.goBack() }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Volver"
@@ -135,7 +136,10 @@ fun FarmerReviewAppointmentScreen(
 
                 // Botón de enviar reseña o actualizar reseña
                 Button(
-                    onClick = { viewModel.submitReview(appointmentId) },
+                    onClick = { viewModel.submitReview(appointmentId,
+                        onSuccess = {
+                            navController.popBackStack()
+                        }) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isSubmitting
                 ) {

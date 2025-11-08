@@ -8,8 +8,9 @@ import com.example.agrotech.domain.appointment.CreateAppointment
 import com.example.agrotech.data.remote.appointment.toAppointment
 import com.example.agrotech.domain.appointment.Appointment
 import com.example.agrotech.domain.appointment.UpdateAppointment
+import javax.inject.Inject
 
-class AppointmentRepository(private val appointmentService: AppointmentService) {
+class AppointmentRepository @Inject constructor(private val appointmentService: AppointmentService) {
     suspend fun getAppointmentById(id: Long, token: String): Resource<Appointment> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {
             return@withContext Resource.Error(message = "Un token es requerido")
@@ -90,13 +91,12 @@ class AppointmentRepository(private val appointmentService: AppointmentService) 
         return@withContext Resource.Error(response.message())
     }
 
-    suspend fun createAppointment(token: String, appointment: Appointment): Resource<Appointment> = withContext(Dispatchers.IO) {
+    suspend fun createAppointment(token: String, appointment: CreateAppointment): Resource<Appointment> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {
             return@withContext Resource.Error(message = "Un token es requerido")
         }
         val bearerToken = "Bearer $token"
-        val response = appointmentService.createAppointment(bearerToken,
-            CreateAppointment(appointment.advisorId, appointment.farmerId, appointment.message, "PENDING", appointment.scheduledDate, appointment.startTime, appointment.endTime) )
+        val response = appointmentService.createAppointment(bearerToken, appointment)
         if (response.isSuccessful) {
             response.body()?.let { appointmentDto ->
                 val appointmentCreated = appointmentDto.toAppointment()

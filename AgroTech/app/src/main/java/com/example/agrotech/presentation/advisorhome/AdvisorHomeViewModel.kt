@@ -9,20 +9,25 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.appointment.AppointmentRepository
+import com.example.agrotech.data.repository.appointment.AvailableDateRepository
 import com.example.agrotech.data.repository.authentication.AuthenticationRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.data.repository.farmer.FarmerRepository // Importa el repositorio de farmers
 import com.example.agrotech.data.repository.notification.NotificationRepository
 import com.example.agrotech.domain.appointment.Appointment
+import com.example.agrotech.domain.appointment.AvailableDate
 import com.example.agrotech.domain.authentication.AuthenticationResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AdvisorHomeViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class AdvisorHomeViewModel @Inject constructor(
     private val advisorRepository: AdvisorRepository,
     private val appointmentRepository: AppointmentRepository,
+    private val availableDateRepository: AvailableDateRepository,
     private val profileRepository: ProfileRepository,
     private val farmerRepository: FarmerRepository,
     private val authenticationRepository: AuthenticationRepository,
@@ -30,6 +35,9 @@ class AdvisorHomeViewModel(
 ) : ViewModel() {
 
     var appointments by mutableStateOf<List<Appointment>>(emptyList())
+        private set
+
+    var availableDates by mutableStateOf<List<AvailableDate>>(emptyList())
         private set
 
     var advisorId by mutableStateOf<Long?>(null)
@@ -86,6 +94,7 @@ class AdvisorHomeViewModel(
                     fetchAdvisorName(GlobalVariables.USER_ID)
                     advisorId?.let {
                         fetchAppointments(it)
+                        fetchAvailableDates(it)
                         fetchFarmerNamesAndImages()
                     }
                 } else if (advisorResult is Resource.Error) {
@@ -106,6 +115,13 @@ class AdvisorHomeViewModel(
             appointments = appointmentsResult.data ?: emptyList()
         } else if (appointmentsResult is Resource.Error) {
             errorMessage = appointmentsResult.message
+        }
+    }
+
+    private suspend fun fetchAvailableDates(advisorId: Long) {
+        val result = availableDateRepository.getAvailableDatesByAdvisor(advisorId, GlobalVariables.TOKEN)
+        if (result is Resource.Success) {
+            availableDates = result.data ?: emptyList()
         }
     }
 
@@ -171,33 +187,10 @@ class AdvisorHomeViewModel(
                 token = GlobalVariables.TOKEN
             )
             authenticationRepository.deleteUser(authResponse)
-            goToWelcomeSection()
         }
     }
 
     fun setExpanded(value: Boolean) {
         _expanded.value = value
-    }
-
-    private fun goToWelcomeSection() {
-        navController.navigate(Routes.Welcome.route)
-    }
-    fun goToProfile() {
-        navController.navigate(Routes.AdvisorProfile.route)
-    }
-    fun goToAppointmentDetails(appointmentId: Long) {
-        navController.navigate(Routes.AdvisorAppointmentDetail.route + "/$appointmentId")
-    }
-    fun goToNotificationList() {
-        navController.navigate(Routes.NotificationList.route)
-    }
-    fun goToAvailableDates() {
-        navController.navigate(Routes.AdvisorAvailableDates.route)
-    }
-    fun goToAppointmentsAdvisorList() {
-        navController.navigate(Routes.AppointmentsAdvisorList.route)
-    }
-    fun goToPosts() {
-        navController.navigate(Routes.AdvisorPosts.route)
     }
 }
