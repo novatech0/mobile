@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,12 +75,10 @@ fun AppointmentCardAdvisor(
                         .align(Alignment.CenterHorizontally)
                 )
 
-                Divider(
-                    color = Color.Black,
-                    thickness = 1.dp,
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 4.dp)
+                        .padding(bottom = 4.dp), thickness = 1.dp, color = Color.Black
                 )
 
                 Text(

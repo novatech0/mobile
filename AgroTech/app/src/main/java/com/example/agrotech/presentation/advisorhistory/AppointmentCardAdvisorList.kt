@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,12 +42,10 @@ fun AppointmentCardAdvisorList(
                 )
 
                 if (index < appointments.size - 1) {
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .padding(vertical = 8.dp)
-                            .fillMaxWidth(),
-                        color = Color.Black.copy(alpha = 0.3f),
-                        thickness = 1.dp
+                            .fillMaxWidth(), thickness = 1.dp, color = Color.Black.copy(alpha = 0.3f)
                     )
                 }
             }

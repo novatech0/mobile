@@ -1,5 +1,6 @@
 package com.example.agrotech.presentation.farmerappointmentdetail
 
+import android.content.ClipData
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -27,8 +28,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -43,6 +42,9 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
 import com.example.agrotech.presentation.farmerhistory.AppointmentCard
 
 @Composable
@@ -54,7 +56,7 @@ fun FarmerAppointmentDetailScreen(
     val isLoading = viewModel.isLoading.observeAsState(false).value
     val errorMessage = viewModel.errorMessage.observeAsState().value
     val showCancelDialog = viewModel.showCancelDialog.observeAsState(false).value
-    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val clipboardManager: Clipboard = LocalClipboard.current
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -235,7 +237,7 @@ fun FarmerAppointmentDetailScreen(
     }
 }
 
-fun copyToClipboard(context: Context, clipboardManager: ClipboardManager, text: String) {
-    clipboardManager.setText(AnnotatedString(text))
+fun copyToClipboard(context: Context, clipboardManager: Clipboard, text: String) {
+    clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText("meeting url", text))
     Toast.makeText(context, "Enlace copiado al portapapeles", Toast.LENGTH_SHORT).show()
 }

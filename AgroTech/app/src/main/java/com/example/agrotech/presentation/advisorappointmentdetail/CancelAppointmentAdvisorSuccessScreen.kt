@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 @Composable
 fun CancelAppointmentAdvisorSuccessScreen(viewModel: AdvisorAppointmentDetailViewModel) {
@@ -42,7 +42,7 @@ fun CancelAppointmentAdvisorSuccessScreen(viewModel: AdvisorAppointmentDetailVie
                     .background(Color(0xFFF1F3F5)) // Fondo gris claro
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Volver",
                     tint = Color.Black
                 )

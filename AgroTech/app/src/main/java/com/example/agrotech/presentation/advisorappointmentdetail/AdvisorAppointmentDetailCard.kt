@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -83,12 +83,10 @@ fun AdvisorAppointmentDetailCard(
                         .align(Alignment.CenterHorizontally)
                 )
 
-                Divider(
-                    color = Color.Black,
-                    thickness = 1.dp,
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 4.dp)
+                        .padding(bottom = 4.dp), thickness = 1.dp, color = Color.Black
                 )
 
                 Text(
