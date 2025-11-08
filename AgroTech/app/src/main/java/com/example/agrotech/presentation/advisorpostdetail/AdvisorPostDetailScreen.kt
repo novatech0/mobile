@@ -1,5 +1,9 @@
 package com.example.agrotech.presentation.advisorpostdetail
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -22,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
+import java.io.File
 
 @Composable
 fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long) {
@@ -33,6 +39,22 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
     val title = viewModel.title.value
     val description = viewModel.description.value
     val isExpanded = viewModel.expanded.value
+    val imageFile = viewModel.image.value
+    val imageUrl = viewModel.imageUrl.value
+
+    val context = LocalContext.current
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            val fileName = uri.lastPathSegment ?: "imagen.jpg"
+            val file = File(context.cacheDir, fileName)
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output -> input.copyTo(output) }
+            }
+            viewModel.onUpdateImage(file)
+        }
+    }
 
     Scaffold { paddingValues ->
         Column(
@@ -118,7 +140,7 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
                 }
                 else -> {
                     AsyncImage(
-                        model = state.data.image,
+                        model = imageFile ?: imageUrl,
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -129,6 +151,27 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
                         placeholder = painterResource(R.drawable.placeholder),
                         error = painterResource(R.drawable.placeholder)
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clickable {
+                                    imagePicker.launch("image/*")
+                                }
+                                .background(Color(0xFF3E64FF), shape = MaterialTheme.shapes.medium)
+                                .padding(horizontal = 16.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = "Subir foto",
+                                color = Color.White,
+                                fontWeight = FontWeight.Normal,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
                     Text(
                         text = "Título",
                         modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),

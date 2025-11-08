@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.newpost
 
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -11,8 +10,9 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.post.PostRepository
-import com.example.agrotech.domain.post.Post
+import com.example.agrotech.domain.post.CreatePost
 import kotlinx.coroutines.launch
+import java.io.File
 
 class NewPostViewModel(private val navController: NavController,
                        private val postRepository: PostRepository,
@@ -26,8 +26,8 @@ class NewPostViewModel(private val navController: NavController,
     private val _description = mutableStateOf("")
     val description: State<String> get() = _description
 
-    private val _image = mutableStateOf("")
-    val image: State<String> get() = _image
+    private val _image = mutableStateOf<File?>(null)
+    val image: State<File?> get() = _image
 
     private val _state = mutableStateOf(UIState<Unit>())
     val state: State<UIState<Unit>> get() = _state
@@ -48,13 +48,19 @@ class NewPostViewModel(private val navController: NavController,
                 _state.value = UIState(message = "Asesor no encontrado")
                 return@launch
             }
-            val post = Post(
-                id = 0,
+
+            if (_title.value.isEmpty() || _description.value.isEmpty() || _image.value == null) {
+                _state.value = UIState(message = "Todos los campos son obligatorios")
+            }
+
+            val post = CreatePost(
+                advisorId = advisor.data.id,
                 title = _title.value,
                 description = _description.value,
-                image = _image.value,
-                advisorId = advisor.data.id
+                image = _image.value!!,
+
             )
+
             when (postRepository.createPost(GlobalVariables.TOKEN, post)) {
                 is Resource.Success -> {
                     _state.value = UIState(isLoading = false)
@@ -75,17 +81,7 @@ class NewPostViewModel(private val navController: NavController,
         _description.value = value
     }
 
-    fun uploadImage(imageUri: Uri) {
-        _state.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            try {
-                val filename = imageUri.lastPathSegment ?: "default_image_name"
-                val imageUrl = cloudStorageRepository.uploadFile(filename, imageUri)
-                _image.value = imageUrl
-                _state.value = UIState(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = UIState(message = "Error guardando la imagen: ${e.message}")
-            }
-        }
+    fun setImage(value: File) {
+        _image.value = value
     }
 }

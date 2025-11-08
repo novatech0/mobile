@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.createprofilefarmer
 
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -16,6 +15,7 @@ import com.example.agrotech.presentation.createaccountfarmer.CreateAccountFarmer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class CreateProfileFarmerViewModel(
     private val navController: NavController,
@@ -24,10 +24,11 @@ class CreateProfileFarmerViewModel(
 ) : ViewModel() {
 
     // Variables de estado para los campos de texto
-    var photoUrl = mutableStateOf("")
-        private set
-    var description = mutableStateOf("")
-        private set
+    private val _photo = mutableStateOf<File?>(null)
+    val photo: State<File?> get() = _photo
+
+    private val _description = mutableStateOf("")
+    val description: State<String> get() = _description
 
     private val _state = mutableStateOf(UIState<Profile>())
     val state: State<UIState<Profile>> get() = _state
@@ -57,12 +58,18 @@ class CreateProfileFarmerViewModel(
                 return@launch
             }
 
+            if (photo.value == null) {
+                _state.value = UIState(message = "Una foto es requerida")
+                _snackbarMessage.value = "Una foto es requerida"
+                return@launch
+            }
+
             _state.value = UIState(isLoading = true)
             val profile = createAccountFarmerViewModel.getProfile().copy(
                 description = description.value,
-                photo = photoUrl.value
+                photo = photo.value!!
             )
-            val result = profileRepository.createProfileFarmer(token, profile)
+            val result = profileRepository.createProfile(token, profile, false)
             withContext(Dispatchers.Main) {
                 if (result is Resource.Success) {
                     _state.value = UIState(data = result.data)
@@ -75,18 +82,12 @@ class CreateProfileFarmerViewModel(
         }
     }
 
-    fun uploadImage(imageUri: Uri) {
-        _state.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            try {
-                val filename = imageUri.lastPathSegment ?: "default_image_name"
-                val imageUrl = cloudStorageRepository.uploadFile(filename, imageUri)
-                photoUrl.value = imageUrl
-                _state.value = UIState(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = UIState(message = "Error uploading image: ${e.message}")
-            }
-        }
+    fun onPhotoChanged(photo: File) {
+        _photo.value = photo
+    }
+
+    fun onDescriptionChanged(description: String) {
+        _description.value = description
     }
 
 }

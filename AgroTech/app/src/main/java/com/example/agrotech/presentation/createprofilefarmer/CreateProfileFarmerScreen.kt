@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.createprofilefarmer
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -28,18 +27,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
+import java.io.File
 
 @Composable
 fun CreateProfileFarmerScreen(viewModel: CreateProfileFarmerViewModel) {
     val state by viewModel.state
     val snackbarMessage by viewModel.snackbarMessage
     val snackbarHostState = remember { SnackbarHostState() }
-    val photoUrl by viewModel.photoUrl
+    val photo by viewModel.photo
 
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
         uri?.let {
-            viewModel.uploadImage(it)
+            val fileName = uri.lastPathSegment ?: "imagen.jpg"
+            val file = File(context.cacheDir, fileName)
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output -> input.copyTo(output) }
+            }
+            viewModel.onPhotoChanged(file)
         }
     }
 
@@ -92,7 +99,7 @@ fun CreateProfileFarmerScreen(viewModel: CreateProfileFarmerViewModel) {
                 Spacer(modifier = Modifier.height(50.dp))
 
                 AsyncImage(
-                    model = photoUrl,
+                    model = photo,
                     contentDescription = "Profile Icon",
                     modifier = Modifier
                         .size(100.dp)
@@ -109,7 +116,7 @@ fun CreateProfileFarmerScreen(viewModel: CreateProfileFarmerViewModel) {
                     modifier = Modifier
                         .width(200.dp)
                         .clickable {
-                            launcher.launch("image/*")
+                            imagePicker.launch("image/*")
                         }
                         .background(Color(0xFF3E64FF), shape = MaterialTheme.shapes.medium)
                         .padding(10.dp),
@@ -134,7 +141,7 @@ fun CreateProfileFarmerScreen(viewModel: CreateProfileFarmerViewModel) {
                 // TextField for Description
                 TextField(
                     value = viewModel.description.value,
-                    onValueChange = { viewModel.description.value = it },
+                    onValueChange = { viewModel.onDescriptionChanged(it) },
                     placeholder = { Text("Cuéntanos un poco sobre ti") },
                     modifier = Modifier
                         .fillMaxWidth()

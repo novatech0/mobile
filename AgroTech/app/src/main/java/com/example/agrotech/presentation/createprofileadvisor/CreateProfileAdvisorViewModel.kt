@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.createprofileadvisor
 
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -16,6 +15,7 @@ import com.example.agrotech.presentation.createaccountadvisor.CreateAccountAdvis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class CreateProfileAdvisorViewModel(
     private val navController: NavController,
@@ -24,14 +24,20 @@ class CreateProfileAdvisorViewModel(
 ) : ViewModel() {
 
     // Variables de estado para los campos de texto
-    var photoUrl = mutableStateOf("")
-        private set
-    var description = mutableStateOf("")
-        private set
-    var occupation = mutableStateOf("")
-        private set
-    var experience = mutableStateOf(0)
+    private val _photoUrl = mutableStateOf("")
+    val photoUrl: State<String> get() = _photoUrl
 
+    private val _description = mutableStateOf("")
+    val description: State<String> get() = _description
+
+    private val _occupation = mutableStateOf("")
+    val occupation: State<String> get() = _occupation
+
+    private val _experience = mutableStateOf(0)
+    val experience: State<Int> get() = _experience
+
+    private val _photo = mutableStateOf<File?>(null)
+    val photo: State<File?> get() = _photo
 
     private val _state = mutableStateOf(UIState<Profile>())
     val state: State<UIState<Profile>> get() = _state
@@ -62,13 +68,20 @@ class CreateProfileAdvisorViewModel(
             }
 
             _state.value = UIState(isLoading = true)
+
+            if (_photo.value == null || _description.value.isBlank() || _occupation.value.isBlank() || _experience.value == 0) {
+                _state.value = UIState(message = "Todos los campos son requeridos")
+                _snackbarMessage.value = "Todos los campos son requeridos"
+                return@launch
+            }
+
             val profile = createAccountAdvisorViewModel.getProfile().copy(
-                description = description.value,
-                occupation = occupation.value,
-                photo = photoUrl.value,
+                description = _description.value,
+                occupation = _occupation.value,
+                photo = _photo.value!!,
                 experience = experience.value
             )
-            val result = profileRepository.createProfileAdvisor(token, profile)
+            val result = profileRepository.createProfile(token, profile, false)
             withContext(Dispatchers.Main) {
                 if (result is Resource.Success) {
                     _state.value = UIState(data = result.data)
@@ -81,18 +94,19 @@ class CreateProfileAdvisorViewModel(
         }
     }
 
-    fun uploadImage(imageUri: Uri) {
-        _state.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            try {
-                val filename = imageUri.lastPathSegment ?: "default_image_name"
-                val imageUrl = cloudStorageRepository.uploadFile(filename, imageUri)
-                photoUrl.value = imageUrl
-                _state.value = UIState(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = UIState(message = "Error uploading image: ${e.message}")
-            }
-        }
+    fun onPhotoChanged(photo: File) {
+        _photo.value = photo
     }
 
+    fun onDescriptionChanged(description: String) {
+        _description.value = description
+    }
+
+    fun onOccupationChanged(occupation: String) {
+        _occupation.value = occupation
+    }
+
+    fun onExperienceChanged(experience: Int) {
+        _experience.value = experience
+    }
 }

@@ -100,7 +100,7 @@ fun ExplorePostsScreen(viewModel: ExplorePostsViewModel) {
                             }
                         }
                     }
-                    state.message != null -> {
+                    state.message.isEmpty() -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center

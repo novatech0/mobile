@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.agrotech.R
+import java.io.File
 
 @Composable
 fun NewPostScreen(viewModel: NewPostViewModel) {
@@ -47,9 +49,18 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
     val title = viewModel.title.value
     val description = viewModel.description.value
     val image = viewModel.image.value
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+
+    val context = LocalContext.current
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
         uri?.let {
-            viewModel.uploadImage(it)
+            val fileName = uri.lastPathSegment ?: "imagen.jpg"
+            val file = File(context.cacheDir, fileName)
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output -> input.copyTo(output) }
+            }
+            viewModel.setImage(file)
         }
     }
 
@@ -112,7 +123,7 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
                         Box(
                             modifier = Modifier
                                 .clickable {
-                                    launcher.launch("image/*")
+                                    imagePicker.launch("image/*")
                                 }
                                 .background(Color(0xFF3E64FF), shape = MaterialTheme.shapes.medium)
                                 .padding(horizontal = 16.dp, vertical = 10.dp)

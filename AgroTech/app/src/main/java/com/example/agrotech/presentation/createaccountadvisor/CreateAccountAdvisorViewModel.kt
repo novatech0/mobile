@@ -14,6 +14,7 @@ import com.example.agrotech.domain.profile.CreateProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class CreateAccountAdvisorViewModel(
     private val navController: NavController,
@@ -47,7 +48,7 @@ class CreateAccountAdvisorViewModel(
             birthDate = birthDate.value,
             description = "",
             occupation = "",
-            photo = "",
+            photo = File(""), // archivo vacio temporal
             experience = 0
         )
     }

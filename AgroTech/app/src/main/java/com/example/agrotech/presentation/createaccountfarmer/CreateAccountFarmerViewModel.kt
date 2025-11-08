@@ -14,6 +14,7 @@ import com.example.agrotech.domain.profile.CreateProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class CreateAccountFarmerViewModel(
     private val navController: NavController,
@@ -45,17 +46,16 @@ class CreateAccountFarmerViewModel(
             city = city.value,
             country = country.value,
             birthDate = birthDate.value,
-            description = "", // This will be set in CreateProfileFarmerViewModel
-            occupation = "", // This will be set in CreateProfileFarmerViewModel
-            photo = "", // This will be set in CreateProfileFarmerViewModel
-            experience = 0 // This will be set in CreateProfileFarmerViewModel
+            description = "",
+            occupation = "",
+            photo = File(""),
+            experience = 0
         )
     }
 
     private val _state = mutableStateOf(UIState<Unit>())
     val state: State<UIState<Unit>> get() = _state
 
-    // Variable de estado para el mensaje del Snackbar
     private val _snackbarMessage = mutableStateOf<String?>(null)
     val snackbarMessage: State<String?> get() = _snackbarMessage
 

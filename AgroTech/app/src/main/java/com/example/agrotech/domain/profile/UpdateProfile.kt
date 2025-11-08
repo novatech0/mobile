@@ -1,5 +1,7 @@
 package com.example.agrotech.domain.profile
 
+import java.io.File
+
 data class UpdateProfile(
     val firstName: String,
     val lastName: String,
@@ -7,7 +9,7 @@ data class UpdateProfile(
     val country: String,
     val birthDate: String,
     val description: String,
-    val photo: String,
+    val photo: File?,
     val occupation: String,
     val experience: Int
 )
