@@ -11,9 +11,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 
 @Composable
-fun FarmerProfileScreen(viewModel: FarmerProfileViewModel) {
+fun FarmerProfileScreen(
+    navController: NavController,
+    viewModel: FarmerProfileViewModel) {
     LaunchedEffect(Unit) {
         viewModel.getFarmerProfile()
     }
@@ -34,7 +38,7 @@ fun FarmerProfileScreen(viewModel: FarmerProfileViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { viewModel.goToHome() }) {
+                IconButton(onClick = { navController.navigate(Routes.FarmerHome.route) }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Go back"

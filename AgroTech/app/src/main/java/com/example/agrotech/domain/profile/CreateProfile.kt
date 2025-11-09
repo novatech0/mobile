@@ -1,5 +1,7 @@
 package com.example.agrotech.domain.profile
 
+import java.io.File
+
 data class CreateProfile(
     val userId: Long,
     val firstName: String,
@@ -9,6 +11,6 @@ data class CreateProfile(
     val birthDate: String,
     val description: String,
     val occupation: String,
-    val photo: String,
+    val photo: File,
     val experience: Int
 )

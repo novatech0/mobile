@@ -1,5 +1,9 @@
 package com.example.agrotech.presentation.advisorpostdetail
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -11,6 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -18,11 +25,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.glide.GlideImage
+import java.io.File
 
 @Composable
-fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long) {
+fun AdvisorPostDetailScreen(
+    navController: NavController,
+    viewModel: AdvisorPostDetailViewModel, postId: Long) {
     LaunchedEffect(Unit) {
         viewModel.getPost(postId)
     }
@@ -31,6 +42,22 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
     val title = viewModel.title.value
     val description = viewModel.description.value
     val isExpanded = viewModel.expanded.value
+    val imageFile = viewModel.image.value
+    val imageUrl = viewModel.imageUrl.value
+
+    val context = LocalContext.current
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            val fileName = uri.lastPathSegment ?: "imagen.jpg"
+            val file = File(context.cacheDir, fileName)
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output -> input.copyTo(output) }
+            }
+            viewModel.onUpdateImage(file)
+        }
+    }
 
     Scaffold { paddingValues ->
         Column(
@@ -45,7 +72,7 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -86,7 +113,9 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
                             )
                         },
                         onClick = {
-                            viewModel.deletePost(postId)
+                            viewModel.deletePost(postId, onSuccess = {
+                                navController.popBackStack()
+                            })
                         }
                     )
                 }
@@ -107,7 +136,7 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = state.message ?: "Error al cargar la publicación",
+                            text = state.message.ifBlank { "Error al cargar la publicación" } ,
                             fontFamily = FontFamily.SansSerif,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleLarge
@@ -115,14 +144,39 @@ fun AdvisorPostDetailScreen(viewModel: AdvisorPostDetailViewModel, postId: Long)
                     }
                 }
                 else -> {
-                    GlideImage(
-                        imageModel = { state.data.image.ifBlank { R.drawable.placeholder } },
+                    AsyncImage(
+                        model = imageFile ?: imageUrl,
+                        contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
                             .padding(8.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.placeholder)
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clickable {
+                                    imagePicker.launch("image/*")
+                                }
+                                .background(Color(0xFF3E64FF), shape = MaterialTheme.shapes.medium)
+                                .padding(horizontal = 16.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = "Subir foto",
+                                color = Color.White,
+                                fontWeight = FontWeight.Normal,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
                     Text(
                         text = "Título",
                         modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),

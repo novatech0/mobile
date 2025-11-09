@@ -1,24 +1,24 @@
 package com.example.agrotech.presentation.newpost
 
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.post.PostRepository
-import com.example.agrotech.data.repository.profile.CloudStorageRepository
-import com.example.agrotech.domain.post.Post
+import com.example.agrotech.domain.post.CreatePost
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.io.File
+import javax.inject.Inject
 
-class NewPostViewModel(private val navController: NavController,
+@HiltViewModel
+class NewPostViewModel @Inject constructor(
                        private val postRepository: PostRepository,
                        private val advisorRepository: AdvisorRepository,
-                       private val cloudStorageRepository: CloudStorageRepository
 )
     : ViewModel()
 {
@@ -28,17 +28,13 @@ class NewPostViewModel(private val navController: NavController,
     private val _description = mutableStateOf("")
     val description: State<String> get() = _description
 
-    private val _image = mutableStateOf("")
-    val image: State<String> get() = _image
+    private val _image = mutableStateOf<File?>(null)
+    val image: State<File?> get() = _image
 
     private val _state = mutableStateOf(UIState<Unit>())
     val state: State<UIState<Unit>> get() = _state
 
-    fun goBack() {
-        navController.popBackStack()
-    }
-
-    fun createPost() {
+    fun createPost(onSuccess: () -> Unit) {
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
             val advisor = advisorRepository.searchAdvisorByUserId(GlobalVariables.USER_ID, GlobalVariables.TOKEN)
@@ -50,17 +46,23 @@ class NewPostViewModel(private val navController: NavController,
                 _state.value = UIState(message = "Asesor no encontrado")
                 return@launch
             }
-            val post = Post(
-                id = 0,
+
+            if (_title.value.isEmpty() || _description.value.isEmpty() || _image.value == null) {
+                _state.value = UIState(message = "Todos los campos son obligatorios")
+            }
+
+            val post = CreatePost(
+                advisorId = advisor.data.id,
                 title = _title.value,
                 description = _description.value,
-                image = _image.value,
-                advisorId = advisor.data.id
+                image = _image.value!!,
+
             )
+
             when (postRepository.createPost(GlobalVariables.TOKEN, post)) {
                 is Resource.Success -> {
                     _state.value = UIState(isLoading = false)
-                    navController.popBackStack()
+                    onSuccess()
                 }
                 is Resource.Error -> {
                     _state.value = UIState(message = "Error al crear la publicación")
@@ -77,17 +79,7 @@ class NewPostViewModel(private val navController: NavController,
         _description.value = value
     }
 
-    fun uploadImage(imageUri: Uri) {
-        _state.value = UIState(isLoading = true)
-        viewModelScope.launch {
-            try {
-                val filename = imageUri.lastPathSegment ?: "default_image_name"
-                val imageUrl = cloudStorageRepository.uploadFile(filename, imageUri)
-                _image.value = imageUrl
-                _state.value = UIState(isLoading = false)
-            } catch (e: Exception) {
-                _state.value = UIState(message = "Error guardando la imagen: ${e.message}")
-            }
-        }
+    fun setImage(value: File) {
+        _image.value = value
     }
 }

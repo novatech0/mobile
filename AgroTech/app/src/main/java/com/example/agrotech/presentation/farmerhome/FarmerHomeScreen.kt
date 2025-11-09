@@ -37,14 +37,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 import com.example.agrotech.presentation.farmerhistory.AppointmentCard
 import com.example.agrotech.presentation.navigationcard.CardItem
 import com.example.agrotech.presentation.navigationcard.NavigationCard
 
 
 @Composable
-fun FarmerHomeScreen(viewModel: FarmerHomeViewModel) {
+fun FarmerHomeScreen(navController: NavController, viewModel: FarmerHomeViewModel) {
     LaunchedEffect(Unit) {
         viewModel.getFarmerName()
         viewModel.getAppointment()
@@ -55,22 +57,22 @@ fun FarmerHomeScreen(viewModel: FarmerHomeViewModel) {
         CardItem(
             image = painterResource(id = R.drawable.icon_advisors),
             text = "Asesores",
-            onClick = { viewModel.goToAdvisorList() }
+            onClick = { navController.navigate(Routes.AdvisorList.route) }
         ),
         CardItem(
             image = painterResource(id = R.drawable.icon_appointments),
             text = "Citas",
-            onClick = { viewModel.goToAppointmentList() }
+            onClick = { navController.navigate(Routes.FarmerAppointmentList.route) }
         ),
         CardItem(
             image = painterResource(id = R.drawable.icon_publications),
             text = "Publicaciones",
-            onClick = { viewModel.goToExplorePosts() }
+            onClick = { navController.navigate(Routes.ExplorePosts.route) }
         ),
         CardItem(
             image = painterResource(id = R.drawable.icon_farm),
             text = "Mis recintos",
-            onClick = { viewModel.goToEnclosures() }
+            onClick = { navController.navigate(Routes.EnclosureList.route) }
         )
     )
     val farmer = viewModel.state.value
@@ -93,7 +95,7 @@ fun FarmerHomeScreen(viewModel: FarmerHomeViewModel) {
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleLarge
                 )
-                IconButton(onClick = { viewModel.goToNotificationList() }) {
+                IconButton(onClick = { navController.navigate(Routes.NotificationList.route) }) {
                     BadgedBox(
                         badge = {
                             if (viewModel.notificationCount.value > 0) {
@@ -143,7 +145,7 @@ fun FarmerHomeScreen(viewModel: FarmerHomeViewModel) {
                             )
                         },
                         onClick = {
-                            viewModel.goToProfile()
+                            navController.navigate(Routes.FarmerProfile.route)
                             viewModel.setExpanded(false)
                         }
                     )
@@ -159,7 +161,11 @@ fun FarmerHomeScreen(viewModel: FarmerHomeViewModel) {
                             )
                         },
                         onClick = {
-                            viewModel.signOut()
+                            navController.navigate(Routes.Welcome.route) {
+                                popUpTo(Routes.Welcome.route) {
+                                    inclusive = true
+                                }
+                            }
                             viewModel.setExpanded(false)
                         }
                     )
@@ -193,7 +199,7 @@ fun FarmerHomeScreen(viewModel: FarmerHomeViewModel) {
                     AppointmentCard(
                         appointment = appointmentCard.data,
                         onClick = {
-                            viewModel.goToAppointmentDetail(appointmentCard.data.id)
+                            navController.navigate(Routes.FarmerAppointmentDetail.route + "/${appointmentCard.data.id}")
                         }
                     )
                 }

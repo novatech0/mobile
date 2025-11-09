@@ -1,27 +1,25 @@
 package com.example.agrotech.presentation.farmerprofile
 
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
 import com.example.agrotech.common.UIState
-import com.example.agrotech.data.repository.profile.CloudStorageRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.profile.Profile
 import com.example.agrotech.domain.profile.UpdateProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.io.File
+import javax.inject.Inject
 
-
-class FarmerProfileViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class FarmerProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
-    private val cloudStorageRepository: CloudStorageRepository
 ) : ViewModel() {
     private val _state = mutableStateOf(UIState<Profile>())
     val state: State<UIState<Profile>> get() = _state
@@ -49,12 +47,11 @@ class FarmerProfileViewModel(
     private val _country = mutableStateOf("")
     val country: State<String> get() = _country
 
-    private val _photo = mutableStateOf("")
-    val photo: State<String> get() = _photo
+    private val _photo = mutableStateOf<File?>(null)
+    val photo: State<File?> get() = _photo
 
-    fun goToHome() {
-        navController.navigate(Routes.FarmerHome.route)
-    }
+    private val _photoUrl = mutableStateOf("")
+    val photoUrl: State<String> get() = _photoUrl
 
     fun getFarmerProfile() {
         _state.value = UIState(isLoading = true)
@@ -69,7 +66,7 @@ class FarmerProfileViewModel(
                 _description.value = result.data?.description ?: ""
                 _city.value = result.data?.city ?: ""
                 _country.value = result.data?.country ?: ""
-                _photo.value = result.data?.photo ?: ""
+                _photoUrl.value = result.data?.photo ?: ""
             } else {
                 _state.value = UIState(message = result.message ?: "Error obteniendo el perfil")
             }
@@ -97,7 +94,7 @@ class FarmerProfileViewModel(
                 experience = 0
             )
 
-            val result = profileRepository.updateProfile(_profileId.longValue, GlobalVariables.TOKEN, updateProfile)
+            val result = profileRepository.updateProfile(GlobalVariables.TOKEN,_profileId.longValue, updateProfile)
             _state.value = if (result is Resource.Success) {
                 UIState(data = result.data)
             } else {
@@ -111,7 +108,6 @@ class FarmerProfileViewModel(
         if (_lastName.value.isBlank()) return "El apellido no puede estar vacío"
         if (_birthDate.value.isBlank()) return "La fecha de nacimiento no puede estar vacía"
         if (_description.value.isBlank()) return "La descripción no puede estar vacía"
-        if (_photo.value.isBlank()) return "La foto no puede estar vacía"
         if (_city.value.isBlank()) return "La ciudad no puede estar vacía"
         if (_country.value.isBlank()) return "El país no puede estar vacío"
 
@@ -120,27 +116,13 @@ class FarmerProfileViewModel(
         return ""
     }
 
-    fun updateProfileWithImage(imageUri: Uri) {
-        _isUploadingImage.value = true
-        viewModelScope.launch {
-            try {
-                val filename = imageUri.lastPathSegment ?: "default_image_name"
-                val imageUrl = cloudStorageRepository.uploadFile(filename, imageUri)
-                _photo.value = imageUrl
-            } catch (e: Exception) {
-                _state.value = UIState(message = "Error uploading image: ${e.message}")
-            } finally {
-                _isUploadingImage.value = false
-            }
-        }
-    }
-
     fun onFirstNameChange(value: String) { _firstName.value = value }
     fun onLastNameChange(value: String) { _lastName.value = value }
     fun onBirthDateChange(value: String) { _birthDate.value = value }
     fun onDescriptionChange(value: String) { _description.value = value }
     fun onCityChange(value: String) { _city.value = value }
     fun onCountryChange(value: String) { _country.value = value }
+    fun onPhotoChange(value: File?) { _photo.value = value }
 }
 
 

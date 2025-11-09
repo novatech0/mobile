@@ -13,20 +13,25 @@ import com.example.agrotech.common.Routes
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.appointment.AppointmentRepository
+import com.example.agrotech.data.repository.appointment.AvailableDateRepository
 import com.example.agrotech.data.repository.authentication.AuthenticationRepository
 import com.example.agrotech.data.repository.farmer.FarmerRepository
 import com.example.agrotech.data.repository.notification.NotificationRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.appointment.Appointment
+import com.example.agrotech.domain.appointment.AvailableDate
 import com.example.agrotech.domain.profile.Profile
 import com.example.agrotech.domain.authentication.AuthenticationResponse
 import com.example.agrotech.presentation.farmerhistory.AppointmentCard
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class FarmerHomeViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class FarmerHomeViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val authenticationRepository: AuthenticationRepository,
     private val appointmentRepository: AppointmentRepository,
+    private val availableDateRepository: AvailableDateRepository,
     private val farmerRepository: FarmerRepository,
     private val advisorRepository: AdvisorRepository,
     private val notificationRepository: NotificationRepository
@@ -77,7 +82,12 @@ class FarmerHomeViewModel(
                 return@launch
             }
 
-            val advisorProfile = fetchAdvisorProfile(appointment.advisorId) ?: run {
+            val availableDate = fetchAvailableDate(appointment.availableDateId) ?: run {
+                _appointmentCard.value = UIState(message = "Error al obtener la fecha disponible")
+                return@launch
+            }
+
+            val advisorProfile = fetchAdvisorProfile(availableDate.advisorId) ?: run {
                 _appointmentCard.value = UIState(message = "Error advisor profile not found")
                 return@launch
             }
@@ -88,9 +98,9 @@ class FarmerHomeViewModel(
                 advisorPhoto = advisorProfile.photo,
                 message = appointment.message,
                 status = appointment.status,
-                scheduledDate = appointment.scheduledDate,
-                startTime = appointment.startTime,
-                endTime = appointment.endTime,
+                scheduledDate = availableDate.scheduledDate,
+                startTime = availableDate.startTime,
+                endTime = availableDate.endTime,
                 meetingUrl = appointment.meetingUrl
             )
 
@@ -108,9 +118,23 @@ class FarmerHomeViewModel(
 
     private suspend fun fetchPendingAppointment(farmerId: Long): Appointment? {
         val appointmentResult = appointmentRepository.getAppointmentsByFarmer(farmerId, GlobalVariables.TOKEN)
-        val appointments = (appointmentResult as? Resource.Success)?.data
-        return appointments?.filter { it.status == "PENDING" }
-            ?.minByOrNull { it.scheduledDate }
+        val appointments = (appointmentResult as? Resource.Success)?.data ?: return null
+
+        val availableDates = appointments.mapNotNull { appointment ->
+            val dateResult = availableDateRepository.getAvailableDateById(appointment.availableDateId, GlobalVariables.TOKEN)
+            val date = (dateResult as? Resource.Success)?.data
+            date?.let { appointment to it } // pares (Appointment, AvailableDate)
+        }
+
+        return availableDates
+            .filter { (appointment, _) -> appointment.status == "PENDING" }
+            .minByOrNull { (_, date) -> date.scheduledDate }
+            ?.first
+    }
+
+    private suspend fun fetchAvailableDate(availableDateId: Long): AvailableDate? {
+        val result = availableDateRepository.getAvailableDateById(availableDateId, GlobalVariables.TOKEN)
+        return (result as? Resource.Success)?.data
     }
 
     private suspend fun fetchAdvisorProfile(advisorId: Long): Profile? {
@@ -121,7 +145,6 @@ class FarmerHomeViewModel(
         return (advisorProfileResult as? Resource.Success)?.data
     }
 
-
     fun signOut() {
         GlobalVariables.ROLES = emptyList()
         viewModelScope.launch {
@@ -131,44 +154,11 @@ class FarmerHomeViewModel(
                 token = GlobalVariables.TOKEN
             )
             authenticationRepository.deleteUser(authResponse)
-            goToWelcomeSection()
         }
-    }
-
-    fun goToProfile() {
-        navController.navigate(Routes.FarmerProfile.route)
     }
 
     fun setExpanded(value: Boolean) {
         _expanded.value = value
-    }
-
-    fun goToAdvisorList() {
-        navController.navigate(Routes.AdvisorList.route)
-    }
-
-    fun goToAppointmentList() {
-        navController.navigate(Routes.FarmerAppointmentList.route)
-    }
-
-    fun goToNotificationList() {
-        navController.navigate(Routes.NotificationList.route)
-    }
-
-    fun goToExplorePosts() {
-        navController.navigate(Routes.ExplorePosts.route)
-    }
-
-    fun goToEnclosures() {
-        navController.navigate(Routes.EnclosureList.route)
-    }
-
-    fun goToAppointmentDetail(appointmentId: Long) {
-        navController.navigate(Routes.FarmerAppointmentDetail.route + "/$appointmentId")
-    }
-
-    private fun goToWelcomeSection() {
-        navController.navigate(Routes.Welcome.route)
     }
 
 }

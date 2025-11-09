@@ -4,16 +4,11 @@ import com.example.agrotech.domain.appointment.Appointment
 
 data class AppointmentDto(
     val id: Long,
-    val advisorId: Long,
     val farmerId: Long,
+    val availableDateId: Long,
     val message: String,
     val status: String,
-    val scheduledDate: String,
-    val startTime: String,
-    val endTime: String,
     val meetingUrl: String
 )
 
-fun AppointmentDto.toAppointment() = Appointment(
-    id, advisorId, farmerId, message, status, scheduledDate, startTime, endTime, meetingUrl
-)
+fun AppointmentDto.toAppointment() = Appointment(id, farmerId, availableDateId, message, status, meetingUrl)

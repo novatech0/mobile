@@ -34,16 +34,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-
-import com.skydoves.landscapist.glide.GlideImage
+import com.example.agrotech.common.Routes
 
 @Composable
-fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
+fun AdvisorDetailScreen(
+    navController: NavController,
+    viewModel: AdvisorDetailViewModel,
+    advisorId: Long) {
     val state = viewModel.state.value
     val snackbarMessage by viewModel.snackbarMessage
     val snackbarHostState = remember { SnackbarHostState() }
@@ -69,7 +75,7 @@ fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -96,15 +102,19 @@ fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        GlideImage(
+
+                        AsyncImage(
+                            model = state.data?.link,
+                            contentDescription = null,
                             modifier = Modifier
                                 .size(128.dp)
                                 .clip(CircleShape)
                                 .border(3.dp, Color(0xFFD8D8D8), CircleShape),
-                            imageModel = {
-                                state.data?.link?.ifBlank { R.drawable.placeholder }
-                            }
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(R.drawable.placeholder),
+                            error = painterResource(R.drawable.placeholder)
                         )
+
                         state.data?.let {
                             Text(
                                 text = it.name,
@@ -122,7 +132,7 @@ fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
                                 disabledContainerColor = Color(0xFFBAC2CB)
                             ),
                             onClick = {
-                                viewModel.goToReviewList(advisorId)
+                                navController.navigate(Routes.ReviewList.route + "/$advisorId")
                             }) {
                             Text(
                                 modifier = Modifier.padding(16.dp),
@@ -222,7 +232,13 @@ fun AdvisorDetailScreen(viewModel: AdvisorDetailViewModel, advisorId: Long) {
                     Button(modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                        onClick = { viewModel.goToNewAppointment(advisorId) },
+                        onClick = {
+                            viewModel.goToNewAppointment(advisorId) { route ->
+                                if (route.isNotBlank()) {
+                                    navController.navigate(route)
+                                }
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF3E64FF), // Color de fondo del botón
                             contentColor = Color.White)) {

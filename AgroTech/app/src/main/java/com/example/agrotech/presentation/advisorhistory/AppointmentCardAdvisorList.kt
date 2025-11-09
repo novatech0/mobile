@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,10 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.agrotech.domain.appointment.Appointment
+import com.example.agrotech.domain.appointment.AvailableDate
 
 @Composable
 fun AppointmentCardAdvisorList(
     appointments: List<Appointment>,
+    availableDates: List<AvailableDate>,
     farmerNames: Map<Long, String>,
     farmerImagesUrl: Map<Long, String>,
     onAppointmentClick: (Appointment) -> Unit // Pass a lambda for navigation
@@ -33,21 +35,22 @@ fun AppointmentCardAdvisorList(
             appointments.forEachIndexed { index, appointment ->
                 val farmerName = farmerNames[appointment.id] ?: "Nombre no disponible"
                 val farmerImageUrl = farmerImagesUrl[appointment.id] ?: ""
+                val availableDate = availableDates.find { it.id == appointment.availableDateId }
 
-                AppointmentCardAdvisor(
-                    appointment = appointment,
-                    farmerName = farmerName,
-                    farmerImageUrl = farmerImageUrl,
-                    onClick = { onAppointmentClick(appointment) } // Pass the click action
-                )
+                if (availableDate != null) {
+                    AppointmentCardAdvisor(
+                        availableDate = availableDate,
+                        farmerName = farmerName,
+                        farmerImageUrl = farmerImageUrl,
+                        onClick = { onAppointmentClick(appointment) } // Pass the click action
+                    )
+                }
 
                 if (index < appointments.size - 1) {
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .padding(vertical = 8.dp)
-                            .fillMaxWidth(),
-                        color = Color.Black.copy(alpha = 0.3f),
-                        thickness = 1.dp
+                            .fillMaxWidth(), thickness = 1.dp, color = Color.Black.copy(alpha = 0.3f)
                     )
                 }
             }

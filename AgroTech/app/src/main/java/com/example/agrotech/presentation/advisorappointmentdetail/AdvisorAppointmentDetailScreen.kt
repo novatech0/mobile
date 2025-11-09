@@ -21,13 +21,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 import kotlinx.coroutines.launch
 
 @Composable
 fun AdvisorAppointmentDetailScreen(
+    navController: NavController,
     appointmentId: Long,
-    viewModel: AdvisorAppointmentDetailViewModel = viewModel()
+    viewModel: AdvisorAppointmentDetailViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -37,10 +41,11 @@ fun AdvisorAppointmentDetailScreen(
     }
 
     val appointment = viewModel.appointmentDetail.value
+    val availableDate = viewModel.availableDate.value
     val isExpanded = viewModel.expanded.value
     val review = viewModel.appointmentReviews.value[appointmentId]
 
-    if (appointment != null) {
+    if (appointment != null && availableDate != null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -53,7 +58,7 @@ fun AdvisorAppointmentDetailScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() },
+                    onClick = { navController.popBackStack() },
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -94,8 +99,8 @@ fun AdvisorAppointmentDetailScreen(
                             )
                         },
                         onClick = {
-                            viewModel.goToProfile()
                             viewModel.setExpanded(false)
+                            navController.navigate(Routes.AdvisorProfile.route)
                         }
                     )
                     DropdownMenuItem(
@@ -108,12 +113,13 @@ fun AdvisorAppointmentDetailScreen(
                         onClick = {
                             viewModel.signOut()
                             viewModel.setExpanded(false)
+                            navController.navigate(Routes.Welcome.route) { popUpTo(0) }
                         }
                     )
                 }
             }
             AdvisorAppointmentDetailCard(
-                appointment = appointment,
+                availableDate = availableDate,
                 farmerName = viewModel.farmerProfile.value?.firstName ?: "Nombre no disponible",
                 farmerImageUrl = viewModel.farmerProfile.value?.photo ?: ""
             )
@@ -136,7 +142,7 @@ fun AdvisorAppointmentDetailScreen(
                     .padding(12.dp)
             ) {
                 Text(
-                    text = appointment.meetingUrl ?: "No disponible",
+                    text = appointment.meetingUrl,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -161,7 +167,7 @@ fun AdvisorAppointmentDetailScreen(
                         .padding(12.dp)
                 ) {
                     Text(
-                        text = appointment.message ?: "No disponible",
+                        text = appointment.message,
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -209,7 +215,8 @@ fun AdvisorAppointmentDetailScreen(
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            viewModel.onCancelAppointmentClick()
+                            viewModel.cancelAppointment()
+                            navController.navigate(Routes.ConfirmDeletionAppointmentAdvisor.route)
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),

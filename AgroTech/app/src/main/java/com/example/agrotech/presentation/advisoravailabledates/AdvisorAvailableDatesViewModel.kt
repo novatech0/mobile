@@ -14,12 +14,14 @@ import com.example.agrotech.common.Routes
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.authentication.AuthenticationRepository
 import com.example.agrotech.domain.appointment.AvailableDate
+import com.example.agrotech.domain.appointment.CreateAvailableDate
 import com.example.agrotech.domain.authentication.AuthenticationResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class AdvisorAvailableDatesViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class AdvisorAvailableDatesViewModel @Inject constructor(
     private val availableDateRepository: AvailableDateRepository,
     private val advisorRepository: AdvisorRepository,
     private val authenticationRepository: AuthenticationRepository,
@@ -85,12 +87,6 @@ class AdvisorAvailableDatesViewModel(
     fun setExpanded(value: Boolean) {
         _expanded.value = value
     }
-    fun goBack() {
-        navController.popBackStack()
-    }
-    private fun goToWelcomeSection() {
-        navController.navigate(Routes.Welcome.route)
-    }
     fun signOut() {
         GlobalVariables.ROLES = emptyList()
         viewModelScope.launch {
@@ -100,11 +96,10 @@ class AdvisorAvailableDatesViewModel(
                 token = GlobalVariables.TOKEN
             )
             authenticationRepository.deleteUser(authResponse)
-            goToWelcomeSection()
         }
     }
 
-    fun createAvailableDate(createAvailableDate: AvailableDate) {
+    fun createAvailableDate(createAvailableDate: CreateAvailableDate) {
         viewModelScope.launch {
             try {
                 val response = availableDateRepository.createAvailableDate(GlobalVariables.TOKEN, createAvailableDate)
@@ -117,9 +112,5 @@ class AdvisorAvailableDatesViewModel(
                 println("Error creating available date: ${e.message}")
             }
         }
-    }
-
-    fun goToProfile() {
-        navController.navigate(Routes.AdvisorProfile.route)
     }
 }

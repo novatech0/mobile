@@ -29,9 +29,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 
 @Composable
-fun AdvisorListScreen(viewModel: AdvisorListViewModel) {
+fun AdvisorListScreen(
+    navController: NavController,
+    viewModel: AdvisorListViewModel) {
     val state = viewModel.state.value
     val filter = viewModel.filter.value
     val search = viewModel.search.value
@@ -50,7 +54,7 @@ fun AdvisorListScreen(viewModel: AdvisorListViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -116,7 +120,7 @@ fun AdvisorListScreen(viewModel: AdvisorListViewModel) {
                 state.data?.let {
                     items(count = it.size, itemContent = { index ->
                         AdvisorCard(advisor = it[index], onClick = {
-                            viewModel.goToAdvisorProfile(it[index].id)
+                            navController.navigate(Routes.AdvisorDetail.route + "/${it[index].id}")
                         })
                     })
                 }

@@ -39,9 +39,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun AnimalDetailsScreen(viewModel: AnimalDetailsViewModel, animalId: Long) {
+fun AnimalDetailsScreen(
+    navController: NavController,
+    viewModel: AnimalDetailsViewModel, animalId: Long) {
     val state = viewModel.state
     val isExpanded = viewModel.expanded.value
     val healthStatusTranslation = mapOf(
@@ -73,7 +76,7 @@ fun AnimalDetailsScreen(viewModel: AnimalDetailsViewModel, animalId: Long) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -118,7 +121,9 @@ fun AnimalDetailsScreen(viewModel: AnimalDetailsViewModel, animalId: Long) {
                             )
                         },
                         onClick = {
-                            viewModel.deleteAnimal(animalId)
+                            viewModel.deleteAnimal(animalId, onSuccess = {
+                                navController.popBackStack()
+                            })
                         }
                     )
                 }

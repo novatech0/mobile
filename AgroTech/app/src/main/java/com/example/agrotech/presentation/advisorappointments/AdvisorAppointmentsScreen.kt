@@ -31,14 +31,18 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.agrotech.common.GlobalVariables
+import com.example.agrotech.common.Routes
 
 
 @Composable
 fun AdvisorAppointmentsScreen(
+    navController: NavController,
     viewModel: AdvisorAppointmentsViewModel
 ) {
     val appointments = viewModel.appointments
+    val availableDates = viewModel.availableDates
     val farmerNames = viewModel.farmerNames
     val farmerImagesUrl = viewModel.farmerImagesUrl
     val isExpanded = viewModel.expanded.value
@@ -60,7 +64,7 @@ fun AdvisorAppointmentsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { viewModel.goBack() }
+                onClick = { navController.popBackStack() }
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -79,7 +83,7 @@ fun AdvisorAppointmentsScreen(
                     style = MaterialTheme.typography.titleLarge
                 )
             }
-            IconButton(onClick = { viewModel.goToAdvisorAppointmentsHistory() }) {
+            IconButton(onClick = { navController.navigate(Routes.AppointmentsAdvisorHistoryList.route) }) {
                 Icon(
                     imageVector = Icons.Default.History,
                     contentDescription = "History",
@@ -109,7 +113,7 @@ fun AdvisorAppointmentsScreen(
                         )
                     },
                     onClick = {
-                        viewModel.goToProfile()
+                        navController.navigate(Routes.AdvisorProfile.route)
                         viewModel.setExpanded(false)
                     }
                 )
@@ -123,6 +127,7 @@ fun AdvisorAppointmentsScreen(
                     onClick = {
                         viewModel.signOut()
                         viewModel.setExpanded(false)
+                        navController.navigate(Routes.Welcome.route) { popUpTo(0) }
                     }
                 )
             }
@@ -131,10 +136,11 @@ fun AdvisorAppointmentsScreen(
 
         AppointmentCardAdvisorList(
             appointments = appointments,
+            availableDates = availableDates,
             farmerNames = farmerNames,
             farmerImagesUrl = farmerImagesUrl,
             onAppointmentClick = { appointment ->
-                viewModel.goToAppointmentDetails(appointment.id)
+                navController.navigate(Routes.AdvisorAppointmentDetail.route + "/${appointment.id}")
             }
         )
     }

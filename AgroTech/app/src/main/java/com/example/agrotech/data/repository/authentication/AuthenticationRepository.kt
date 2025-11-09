@@ -9,8 +9,9 @@ import com.example.agrotech.domain.authentication.AuthenticationResponse
 import com.example.agrotech.domain.authentication.SignUpRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class AuthenticationRepository(private val authenticationService: AuthenticationService, private val userDao: UserDao) {
+class AuthenticationRepository @Inject constructor(private val authenticationService: AuthenticationService, private val userDao: UserDao) {
 
     suspend fun signUp(username: String, password: String, roles: List<String>) = withContext(Dispatchers.IO) {
         val response = authenticationService.signUp(SignUpRequest(username, password, roles))

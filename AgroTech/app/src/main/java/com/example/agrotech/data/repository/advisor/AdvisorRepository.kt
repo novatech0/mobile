@@ -6,8 +6,9 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.data.remote.advisor.AdvisorService
 import com.example.agrotech.data.remote.advisor.toAdvisor
 import com.example.agrotech.domain.advisor.Advisor
+import javax.inject.Inject
 
-class AdvisorRepository(private val advisorService: AdvisorService) {
+class AdvisorRepository @Inject constructor(private val advisorService: AdvisorService) {
     suspend fun searchAdvisorByUserId(userId: Long, token: String): Resource<Advisor> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {
             return@withContext Resource.Error(message = "Un token es requerido")

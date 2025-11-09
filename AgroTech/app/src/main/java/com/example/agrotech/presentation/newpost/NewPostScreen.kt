@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.newpost
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,22 +31,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.glide.GlideImage
+import java.io.File
 
 @Composable
-fun NewPostScreen(viewModel: NewPostViewModel) {
+fun NewPostScreen(navController: NavController, viewModel: NewPostViewModel) {
     val state = viewModel.state.value
     val title = viewModel.title.value
     val description = viewModel.description.value
     val image = viewModel.image.value
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+
+    val context = LocalContext.current
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
         uri?.let {
-            viewModel.uploadImage(it)
+            val fileName = uri.lastPathSegment ?: "imagen.jpg"
+            val file = File(context.cacheDir, fileName)
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output -> input.copyTo(output) }
+            }
+            viewModel.setImage(file)
         }
     }
 
@@ -62,7 +73,7 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -92,13 +103,16 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
                     }
                 }
                 else -> {
-                    GlideImage(
-                        imageModel = { image.ifBlank { R.drawable.placeholder } },
+                    AsyncImage(
+                        model = image,
+                        contentDescription = "Image",
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
                             .padding(8.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp)),
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.placeholder)
                     )
                     Box(
                         modifier = Modifier
@@ -108,7 +122,7 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
                         Box(
                             modifier = Modifier
                                 .clickable {
-                                    launcher.launch("image/*")
+                                    imagePicker.launch("image/*")
                                 }
                                 .background(Color(0xFF3E64FF), shape = MaterialTheme.shapes.medium)
                                 .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -153,7 +167,7 @@ fun NewPostScreen(viewModel: NewPostViewModel) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
-                            viewModel.createPost()
+                            viewModel.createPost(onSuccess = { navController.popBackStack() })
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {

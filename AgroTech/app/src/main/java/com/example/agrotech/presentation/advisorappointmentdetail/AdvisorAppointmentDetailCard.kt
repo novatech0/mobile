@@ -1,7 +1,6 @@
 package com.example.agrotech.presentation.advisorappointmentdetail
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,13 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.example.agrotech.domain.appointment.Appointment
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.glide.GlideImage
+import com.example.agrotech.domain.appointment.AvailableDate
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,7 +35,7 @@ import java.util.Locale
 
 @Composable
 fun AdvisorAppointmentDetailCard(
-    appointment: Appointment,
+    availableDate: AvailableDate,
     farmerName: String,
     farmerImageUrl: String
 ) {
@@ -54,20 +53,17 @@ fun AdvisorAppointmentDetailCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GlideImage(
+            AsyncImage(
+                model = farmerImageUrl,
+                contentDescription = null,
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
                     .border(4.dp, Color.Gray, CircleShape),
-                imageModel = {
-                    if (farmerImageUrl.isNotBlank()) farmerImageUrl else R.drawable.placeholder
-                },
-                imageOptions = ImageOptions(
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
-                )
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(R.drawable.placeholder),
+                error = painterResource(R.drawable.placeholder)
             )
-
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(
@@ -86,16 +82,14 @@ fun AdvisorAppointmentDetailCard(
                         .align(Alignment.CenterHorizontally)
                 )
 
-                Divider(
-                    color = Color.Black,
-                    thickness = 1.dp,
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 4.dp)
+                        .padding(bottom = 4.dp), thickness = 1.dp, color = Color.Black
                 )
 
                 Text(
-                    text = "${formatDateShort(appointment.scheduledDate)} (${formatTime(appointment.startTime)} - ${formatTime(appointment.endTime)})",
+                    text = "${formatDateShort(availableDate.scheduledDate)} (${formatTime(availableDate.startTime)} - ${formatTime(availableDate.endTime)})",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF06204A)

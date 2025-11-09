@@ -34,10 +34,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 import com.example.agrotech.domain.appointment.AvailableDate
+import com.example.agrotech.domain.appointment.CreateAvailableDate
 
 @Composable
 fun AdvisorAvailableDatesScreen(
+    navController: NavController,
     viewModel: AdvisorAvailableDatesViewModel
 ) {
     val availableDates by viewModel.availableDates.observeAsState(emptyList())
@@ -76,7 +80,7 @@ fun AdvisorAvailableDatesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -117,7 +121,7 @@ fun AdvisorAvailableDatesScreen(
                             )
                         },
                         onClick = {
-                            viewModel.goToProfile()
+                            navController.navigate(Routes.AdvisorProfile.route)
                             viewModel.setExpanded(false)
                         }
                     )
@@ -131,6 +135,7 @@ fun AdvisorAvailableDatesScreen(
                         onClick = {
                             viewModel.signOut()
                             viewModel.setExpanded(false)
+                            navController.navigate(Routes.Welcome.route) { popUpTo(0) }
                         }
                     )
                 }
@@ -153,7 +158,7 @@ fun AdvisorAvailableDatesScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = "📅 Fecha: ${date.availableDate}")
+                                Text(text = "📅 Fecha: ${date.scheduledDate}")
                                 Text(text = "🕒 Desde: ${date.startTime}")
                                 Text(text = "🕓 Hasta: ${date.endTime}")
                             }
@@ -212,12 +217,11 @@ fun AdvisorAvailableDatesScreen(
                         onClick = {
                             val advisorId = viewModel.advisorId
                             if (advisorId != null) {
-                                val newDate = AvailableDate(
-                                    id = 0L,
+                                val newDate = CreateAvailableDate(
                                     advisorId = advisorId,
-                                    availableDate = availableDateInput.text,
+                                    scheduledDate = availableDateInput.text,
                                     startTime = startTimeInput.text,
-                                    endTime = endTimeInput.text
+                                    endTime = endTimeInput.text,
                                 )
                                 viewModel.createAvailableDate(newDate)
                                 showDialog = false

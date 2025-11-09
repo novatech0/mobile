@@ -28,16 +28,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.glide.GlideImage
+import com.example.agrotech.common.Routes
 
 @Composable
-fun ExplorePostsScreen(viewModel: ExplorePostsViewModel) {
+fun ExplorePostsScreen(
+    navController: NavController,
+    viewModel: ExplorePostsViewModel) {
     val state = viewModel.state.value
 
     LaunchedEffect(Unit) {
@@ -57,7 +61,7 @@ fun ExplorePostsScreen(viewModel: ExplorePostsViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -96,11 +100,11 @@ fun ExplorePostsScreen(viewModel: ExplorePostsViewModel) {
                     state.data != null -> {
                         state.data.forEach { post ->
                             PostCardItem(post = post) {
-                                viewModel.goToAdvisorDetail(post.advisorId)
+                                navController.navigate(Routes.AdvisorDetail.route + "/${post.advisorId}")
                             }
                         }
                     }
-                    state.message != null -> {
+                    state.message.isEmpty() -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -134,16 +138,17 @@ fun PostCardItem(post: PostCard, onClick : () -> Unit) {
                 onClick()
             }
         ) {
-            GlideImage(
-                modifier = Modifier.size(45.dp).clip(CircleShape),
-                imageModel = {
-                    post.advisorPhoto.ifBlank { R.drawable.placeholder }
-                },
-                imageOptions = ImageOptions(
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
-                )
+            AsyncImage(
+                model = post.advisorPhoto,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(45.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(R.drawable.placeholder),
+                error = painterResource(R.drawable.placeholder)
             )
+
             Text(
                 text = post.advisorName,
                 color = Color(0xFF222B45),
@@ -155,16 +160,16 @@ fun PostCardItem(post: PostCard, onClick : () -> Unit) {
                     .padding(start = 8.dp)
             )
         }
-        GlideImage(
-            modifier = Modifier.fillMaxWidth(),
-            imageModel = {
-                post.image.ifBlank { R.drawable.placeholder }
-            },
-            imageOptions = ImageOptions(
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.Center
-            )
+        AsyncImage(
+            model = post.image,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.placeholder),
+            error = painterResource(R.drawable.placeholder)
         )
+
 
         Text(
             text = post.title,
