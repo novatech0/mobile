@@ -12,10 +12,12 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.animal.AnimalRepository
 import com.example.agrotech.domain.animal.Animal
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AnimalDetailsViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class AnimalDetailsViewModel @Inject constructor(
     private val animalRepository: AnimalRepository,
 ): ViewModel() {
     private val _state = mutableStateOf(UIState<Animal>())
@@ -53,10 +55,6 @@ class AnimalDetailsViewModel(
 
     fun setExpanded(value: Boolean) {
         _expanded.value = value
-    }
-
-    fun goBack() {
-        navController.popBackStack()
     }
 
     fun getAnimal(animalId: Long) {
@@ -105,12 +103,12 @@ class AnimalDetailsViewModel(
         }
     }
 
-    fun deleteAnimal(animalId: Long) {
+    fun deleteAnimal(animalId: Long, onSuccess: () -> Unit) {
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
             animalRepository.deleteAnimal(GlobalVariables.TOKEN, animalId)
             _state.value = UIState(message = "Animal eliminado")
-            navController.popBackStack()
+            onSuccess()
         }
     }
 

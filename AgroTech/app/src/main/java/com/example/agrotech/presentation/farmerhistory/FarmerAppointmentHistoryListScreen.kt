@@ -12,8 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -35,6 +35,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -42,6 +44,7 @@ import java.util.Locale
 
 @Composable
 fun FarmerAppointmentHistoryListScreen(
+    navController: NavController,
     viewModel: FarmerHistoryViewModel
 ) {
     val state = viewModel.state.value
@@ -88,7 +91,7 @@ fun FarmerAppointmentHistoryListScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = { viewModel.goBack() }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Go back"
@@ -140,7 +143,7 @@ fun FarmerAppointmentHistoryListScreen(
                         label = { Text("Mostrar todas") },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.List,
+                                imageVector = Icons.AutoMirrored.Filled.List,
                                 contentDescription = "Mostrar todas las citas"
                             )
                         },
@@ -157,7 +160,7 @@ fun FarmerAppointmentHistoryListScreen(
                         items(appointments) { appointment ->
                             AppointmentCard(
                                 appointment = appointment,
-                                onClick = { viewModel.onReviewAppointment(appointment.id) }
+                                onClick = { navController.navigate(Routes.FarmerReviewAppointment.route + "/${appointment.id}") }
                             )
                         }
                     }

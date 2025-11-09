@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,12 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun AppointmentCard(appointment: AppointmentCard, onClick: ((Long) -> Unit)? = null) {
@@ -49,15 +49,16 @@ fun AppointmentCard(appointment: AppointmentCard, onClick: ((Long) -> Unit)? = n
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GlideImage(
-                modifier = Modifier.size(64.dp).clip(CircleShape).border(4.dp, Color.Gray, CircleShape),
-                imageModel = {
-                    appointment.advisorPhoto.ifBlank { R.drawable.placeholder }
-                },
-                imageOptions = ImageOptions(
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
-                )
+            AsyncImage(
+                model = appointment.advisorPhoto,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .border(4.dp, Color.Gray, CircleShape),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(R.drawable.placeholder),
+                error = painterResource(R.drawable.placeholder)
             )
             Spacer(modifier = Modifier.width(16.dp)) // Espacio entre la imagen y el texto
             Column(
@@ -76,13 +77,10 @@ fun AppointmentCard(appointment: AppointmentCard, onClick: ((Long) -> Unit)? = n
                         .align(Alignment.CenterHorizontally)
                 )
                 // Línea divisoria
-                Divider(
-                    color = Color.Black, // Línea negra
-                    thickness = 1.dp,
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 4.dp)
-
+                        .padding(bottom = 4.dp), thickness = 1.dp, color = Color.Black
                 )
                 Text(
                     text = "${appointment.scheduledDate} (${appointment.startTime} - ${appointment.endTime})",

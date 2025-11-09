@@ -10,16 +10,16 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.notification.NotificationRepository
 import com.example.agrotech.domain.notification.Notification
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NotificationListViewModel(private val navController: NavController, private val notificationRepository: NotificationRepository) : ViewModel() {
+@HiltViewModel
+class NotificationListViewModel @Inject constructor(
+    private val notificationRepository: NotificationRepository) : ViewModel() {
 
     private val _state = mutableStateOf(UIState<List<Notification>>())
     val state: State<UIState<List<Notification>>> get() = _state
-
-    fun goBack() {
-        navController.popBackStack()
-    }
 
     fun getNotificationList() {
         _state.value = UIState(isLoading = true)

@@ -29,14 +29,18 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.agrotech.common.GlobalVariables
+import com.example.agrotech.common.Routes
 import com.example.agrotech.presentation.advisorappointments.AdvisorAppointmentsViewModel
 
 
 @Composable
 fun AdvisorAppointmentsHistoryScreen(
+    navController: NavController,
     viewModel: AdvisorAppointmentsViewModel
 ) {
+    val availableDates = viewModel.availableDates
     val appointments = viewModel.appointments
     val farmerNames = viewModel.farmerNames
     val farmerImagesUrl = viewModel.farmerImagesUrl
@@ -59,7 +63,7 @@ fun AdvisorAppointmentsHistoryScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { viewModel.goBack() }
+                onClick = { navController.popBackStack() }
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -100,7 +104,7 @@ fun AdvisorAppointmentsHistoryScreen(
                         )
                     },
                     onClick = {
-                        viewModel.goToProfile()
+                        navController.navigate(Routes.AdvisorProfile.route)
                         viewModel.setExpanded(false)
                     }
                 )
@@ -114,6 +118,7 @@ fun AdvisorAppointmentsHistoryScreen(
                     onClick = {
                         viewModel.signOut()
                         viewModel.setExpanded(false)
+                        navController.navigate(Routes.Welcome.route) { popUpTo(0) }
                     }
                 )
             }
@@ -122,10 +127,11 @@ fun AdvisorAppointmentsHistoryScreen(
 
         AppointmentCardAdvisorList(
             appointments = appointments,
+            availableDates = availableDates,
             farmerNames = farmerNames,
             farmerImagesUrl = farmerImagesUrl,
             onAppointmentClick = { appointment ->
-                viewModel.goToAppointmentDetails(appointment.id)
+                navController.navigate(Routes.AdvisorAppointmentDetail.route + "/${appointment.id}")
             }
         )
     }

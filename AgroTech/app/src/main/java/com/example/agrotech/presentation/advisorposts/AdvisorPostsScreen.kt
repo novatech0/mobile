@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.advisorposts
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,9 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.More
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,18 +26,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 import com.example.agrotech.domain.post.Post
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
-fun AdvisorPostsScreen(viewModel: AdvisorPostsViewModel) {
+fun AdvisorPostsScreen(
+    navController: NavController,
+    viewModel: AdvisorPostsViewModel) {
     val state = viewModel.state.value
 
     LaunchedEffect(Unit) {
@@ -57,7 +58,7 @@ fun AdvisorPostsScreen(viewModel: AdvisorPostsViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -77,7 +78,7 @@ fun AdvisorPostsScreen(viewModel: AdvisorPostsViewModel) {
                     )
                 }
                 IconButton(
-                    onClick = { viewModel.goToCreatePost() }
+                    onClick = { navController.navigate(Routes.NewPost.route) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -105,7 +106,7 @@ fun AdvisorPostsScreen(viewModel: AdvisorPostsViewModel) {
                     }
                     items(count = it.size, itemContent = { index ->
                         PostItem(post = it[index], onClick = {
-                            viewModel.goToPostDetails(it[index].id)
+                            navController.navigate(Routes.AdvisorPostDetail.route + "/${it[index].id}")
                         })
                     })
                 }
@@ -140,13 +141,17 @@ fun PostItem(post: Post, onClick: () -> Unit) {
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        GlideImage(
-            imageModel = { post.image.ifBlank { R.drawable.placeholder } },
+        AsyncImage(
+            model = post.image,
+            contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .padding(8.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.placeholder),
+            error = painterResource(R.drawable.placeholder)
         )
         Text(
             text = post.title,

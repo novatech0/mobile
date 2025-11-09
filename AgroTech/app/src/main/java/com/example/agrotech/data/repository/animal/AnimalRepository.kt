@@ -7,8 +7,9 @@ import com.example.agrotech.domain.animal.Animal
 import com.example.agrotech.domain.animal.toAnimalDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class AnimalRepository(private val animalService: AnimalService) {
+class AnimalRepository @Inject constructor(private val animalService: AnimalService) {
 
     suspend fun getAnimalsByEnclosureId(token: String, enclosureId: Long): Resource<List<Animal>> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {

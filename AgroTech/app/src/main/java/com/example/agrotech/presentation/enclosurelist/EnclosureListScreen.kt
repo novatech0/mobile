@@ -13,10 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 import com.example.agrotech.domain.enclosure.Enclosure
 
 @Composable
 fun EnclosureListScreen(
+    navController: NavController,
     viewModel: EnclosureListViewModel
 ) {
     val state = viewModel.state
@@ -46,7 +49,7 @@ fun EnclosureListScreen(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { viewModel.goBack() }) {
+                IconButton(onClick = { navController.popBackStack() }) {
                     Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                 }
                 Box(
@@ -95,7 +98,7 @@ fun EnclosureListScreen(
                             val enclosure = state.data[index]
                             EnclosureListItem(
                                 enclosure = enclosure,
-                                onClick = { viewModel.goToAnimals(enclosure.id) }
+                                onClick = { navController.navigate(Routes.AnimalList.route + "/${enclosure.id}") }
                             )
                         }
                     }

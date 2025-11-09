@@ -8,8 +8,9 @@ import com.example.agrotech.domain.notification.CreateNotification
 import com.example.agrotech.domain.notification.Notification
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class NotificationRepository(private val notificationService: NotificationService) {
+class NotificationRepository @Inject constructor(private val notificationService: NotificationService) {
 
     suspend fun getNotifications(userId: Long, token: String): Resource<List<Notification>> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {

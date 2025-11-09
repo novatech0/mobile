@@ -12,8 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,6 +36,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 import com.example.agrotech.presentation.farmerhistory.AppointmentCard
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -43,7 +45,9 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun FarmerAppointmentListScreen(viewModel: FarmerAppointmentListViewModel) {
+fun FarmerAppointmentListScreen(
+    navController: NavController,
+    viewModel: FarmerAppointmentListViewModel) {
     val state = viewModel.state.value
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -87,7 +91,7 @@ fun FarmerAppointmentListScreen(viewModel: FarmerAppointmentListViewModel) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = { viewModel.goBack() }) {
+                    IconButton(onClick = { navController.navigate(Routes.FarmerHome.route) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Go back"
@@ -101,7 +105,7 @@ fun FarmerAppointmentListScreen(viewModel: FarmerAppointmentListViewModel) {
                         style = MaterialTheme.typography.titleLarge
                     )
                     Row {
-                        IconButton(onClick = { viewModel.goHistory() }) {
+                        IconButton(onClick = { navController.navigate(Routes.FarmerAppointmentHistory.route) }) {
                             Icon(
                                 imageVector = Icons.Outlined.History,
                                 contentDescription = "Historial"
@@ -147,7 +151,7 @@ fun FarmerAppointmentListScreen(viewModel: FarmerAppointmentListViewModel) {
                         label = { Text("Mostrar todas") },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.List,
+                                imageVector = Icons.AutoMirrored.Filled.List,
                                 contentDescription = "Mostrar todas las citas"
                             )
                         },
@@ -164,7 +168,7 @@ fun FarmerAppointmentListScreen(viewModel: FarmerAppointmentListViewModel) {
                         items(appointments) { appointment ->
                             AppointmentCard(
                                 appointment = appointment,
-                                onClick = { viewModel.goAppointmentDetail(appointment.id) }
+                                onClick = { navController.navigate(Routes.FarmerAppointmentDetail.route + "/${appointment.id}") }
                             )
                         }
                     }

@@ -1,6 +1,5 @@
 package com.example.agrotech.presentation.advisorprofile
 
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -12,17 +11,17 @@ import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
 import com.example.agrotech.common.UIState
-import com.example.agrotech.data.repository.profile.CloudStorageRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.profile.Profile
 import com.example.agrotech.domain.profile.UpdateProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.io.File
+import javax.inject.Inject
 
-
-class AdvisorProfileViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class AdvisorProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
-    private val cloudStorageRepository: CloudStorageRepository
 ) : ViewModel() {
     private val _state = mutableStateOf(UIState<Profile>())
     val state: State<UIState<Profile>> get() = _state
@@ -50,18 +49,17 @@ class AdvisorProfileViewModel(
     private val _country = mutableStateOf("")
     val country: State<String> get() = _country
 
-    private val _photo = mutableStateOf("")
-    val photo: State<String> get() = _photo
+    private val _photo = mutableStateOf<File?>(null)
+    val photo: State<File?> get() = _photo
+
+    private val _photoUrl = mutableStateOf("")
+    val photoUrl: State<String> get() = _photoUrl
 
     private val _occupation = mutableStateOf("")
     val occupation: State<String> get() = _occupation
 
     private val _experience = mutableIntStateOf(0)
     val experience: State<Int> get() = _experience
-
-    fun goToHome() {
-        navController.navigate(Routes.AdvisorHome.route)
-    }
 
     fun getAdvisorProfile() {
         _state.value = UIState(isLoading = true)
@@ -76,7 +74,7 @@ class AdvisorProfileViewModel(
                 _description.value = result.data?.description ?: ""
                 _city.value = result.data?.city ?: ""
                 _country.value = result.data?.country ?: ""
-                _photo.value = result.data?.photo ?: ""
+                _photoUrl.value = result.data?.photo ?: ""
                 _occupation.value = result.data?.occupation ?: ""
                 _experience.intValue = result.data?.experience ?: 0
             } else {
@@ -106,7 +104,7 @@ class AdvisorProfileViewModel(
                 experience = _experience.intValue
             )
 
-            val result = profileRepository.updateProfile(_profileId.longValue, GlobalVariables.TOKEN, updateProfile)
+            val result = profileRepository.updateProfile(GlobalVariables.TOKEN, _profileId.longValue, updateProfile)
             _state.value = if (result is Resource.Success) {
                 UIState(data = result.data)
             }
@@ -123,7 +121,6 @@ class AdvisorProfileViewModel(
         if (_lastName.value.isBlank()) return "El apellido no puede estar vacío"
         if (_birthDate.value.isBlank()) return "La fecha de nacimiento no puede estar vacía"
         if (_description.value.isBlank()) return "La descripción no puede estar vacía"
-        if (_photo.value.isBlank()) return "La foto no puede estar vacía"
         if (_city.value.isBlank()) return "La ciudad no puede estar vacía"
         if (_country.value.isBlank()) return "El país no puede estar vacío"
         if (_occupation.value.isBlank()) return "La ocupación no puede estar vacía"
@@ -134,22 +131,6 @@ class AdvisorProfileViewModel(
         return ""
     }
 
-    fun updateProfileWithImage(imageUri: Uri) {
-        _isUploadingImage.value = true
-        viewModelScope.launch {
-            try {
-                val filename = imageUri.lastPathSegment ?: "default_image_name"
-                val imageUrl = cloudStorageRepository.uploadFile(filename, imageUri)
-                _photo.value = imageUrl
-            } catch (e: Exception) {
-                _state.value = UIState(message = "Error uploading image: ${e.message}")
-            }
-            finally {
-                _isUploadingImage.value = false
-            }
-        }
-    }
-
     fun onFirstNameChange(value: String) { _firstName.value = value }
     fun onLastNameChange(value: String) { _lastName.value = value }
     fun onBirthDateChange(value: String) { _birthDate.value = value }
@@ -158,6 +139,7 @@ class AdvisorProfileViewModel(
     fun onCountryChange(value: String) { _country.value = value }
     fun onOccupationChange(value: String) { _occupation.value = value }
     fun onExperienceChange(value: Int) { _experience.intValue = value }
+    fun onPhotoChange(value: File?) { _photo.value = value }
 }
 
 

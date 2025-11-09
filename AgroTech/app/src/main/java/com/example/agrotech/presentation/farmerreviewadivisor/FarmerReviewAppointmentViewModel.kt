@@ -11,15 +11,19 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.appointment.AppointmentRepository
+import com.example.agrotech.data.repository.appointment.AvailableDateRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.data.repository.appointment.ReviewRepository
 import com.example.agrotech.domain.appointment.Review
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FarmerReviewAppointmentViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class FarmerReviewAppointmentViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val appointmentRepository: AppointmentRepository,
+    private val availableDateRepository: AvailableDateRepository,
     private val advisorRepository: AdvisorRepository,
     private val profileRepository: ProfileRepository
 ) : ViewModel() {
@@ -54,37 +58,27 @@ class FarmerReviewAppointmentViewModel(
     }
 
     fun loadAdvisorDetails(appointmentId: Long) {
-
         _comment.value = ""
         _rating.value = 0
         _hasReview.value = false
 
         viewModelScope.launch {
-
             val appointmentResult = appointmentRepository.getAppointmentById(appointmentId, GlobalVariables.TOKEN)
 
             if (appointmentResult is Resource.Success && appointmentResult.data != null) {
-
                 val appointment = appointmentResult.data
-                val advisorId = appointment.advisorId
-
-                Log.d("FarmerReviewAppointmentViewModel", "AdvisorId: $advisorId, farmerId: ${appointment.farmerId}")
-
+                val availableDateResult = availableDateRepository.getAvailableDateById(appointmentResult.data.availableDateId, GlobalVariables.TOKEN)
+                val advisorId = if (availableDateResult is Resource.Success) availableDateResult.data?.advisorId ?: 0 else 0
                 val reviewResult = reviewRepository.getReviewByAdvisorIdAndFarmerId(advisorId, appointment.farmerId, GlobalVariables.TOKEN)
-
                 if (reviewResult is Resource.Success && reviewResult.data != null) {
                     val review = reviewResult.data
                     _hasReview.value = true
-                    _comment.value = review.comment ?: "" // Manejar comentario nulo
-                    _rating.value = review.rating ?: 0 // Manejar rating nulo
-
-                    Log.d("FarmerReview", "Reseña encontrada: ${review.comment}, Rating: ${review.rating}")
+                    _comment.value = review.comment
+                    _rating.value = review.rating
                 } else {
                     _comment.value = ""
                     _rating.value = 0
                     _hasReview.value = false
-
-                    Log.d("FarmerReview", "No se encontró información de la reseña para el asesor $advisorId y agricultor ${appointment.farmerId}")
                 }
 
 
@@ -111,7 +105,7 @@ class FarmerReviewAppointmentViewModel(
         }
     }
 
-    fun submitReview(appointmentId: Long) {
+    fun submitReview(appointmentId: Long, onSuccess: () -> Unit) {
         if (_rating.value == 0) {
             _state.value = UIState(message = "Por favor, selecciona una calificación.")
             return
@@ -124,7 +118,14 @@ class FarmerReviewAppointmentViewModel(
 
             if (appointmentResult is Resource.Success) {
                 val appointment = appointmentResult.data
-                val advisorId = appointment?.advisorId ?: 0L
+                if (appointment == null) {
+                    _isSubmitting.value = false
+                    _state.value = UIState(message = "Error al obtener la cita. Por favor, intenta nuevamente.")
+                    return@launch
+                }
+
+                val availableDateResult = availableDateRepository.getAvailableDateById(appointment.availableDateId, GlobalVariables.TOKEN)
+                val advisorId = if (availableDateResult is Resource.Success) availableDateResult.data?.advisorId ?: 0 else 0
                 val farmerId = appointment?.farmerId ?: 0L
 
                 val review = Review(
@@ -157,7 +158,7 @@ class FarmerReviewAppointmentViewModel(
 
                 if (result is Resource.Success) {
                     _state.value = UIState(message = "Calificación enviada exitosamente.")
-                    navController.popBackStack() // Regresar una vez que se envíe la reseña exitosamente
+                    onSuccess() // Regresar una vez que se envíe la reseña exitosamente
                 } else {
                     _state.value = UIState(message = "Error al enviar la calificación. Por favor, intenta nuevamente.")
                 }
@@ -166,10 +167,6 @@ class FarmerReviewAppointmentViewModel(
                 _state.value = UIState(message = "Error al obtener la cita. Por favor, intenta nuevamente.")
             }
         }
-    }
-
-    fun goBack() {
-        navController.popBackStack()
     }
 
     fun clearState() {

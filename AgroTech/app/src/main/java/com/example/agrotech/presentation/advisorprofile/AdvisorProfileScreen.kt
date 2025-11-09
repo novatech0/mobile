@@ -11,9 +11,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 
 @Composable
-fun AdvisorProfileScreen(viewModel: AdvisorProfileViewModel) {
+fun AdvisorProfileScreen(
+    navController: NavController,
+    viewModel: AdvisorProfileViewModel) {
     LaunchedEffect(Unit) {
         viewModel.getAdvisorProfile()
     }
@@ -34,7 +38,7 @@ fun AdvisorProfileScreen(viewModel: AdvisorProfileViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { viewModel.goToHome() }) {
+                IconButton(onClick = { navController.navigate(Routes.AdvisorHome.route) }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Go back"

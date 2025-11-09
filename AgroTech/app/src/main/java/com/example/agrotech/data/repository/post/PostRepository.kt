@@ -1,16 +1,20 @@
 package com.example.agrotech.data.repository.post
 
-import android.util.Log
-import com.example.agrotech.common.Constants
-import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.data.remote.post.PostService
 import com.example.agrotech.data.remote.post.toPost
+import com.example.agrotech.domain.post.CreatePost
 import com.example.agrotech.domain.post.Post
+import com.example.agrotech.domain.post.UpdatePost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import javax.inject.Inject
 
-class PostRepository(private val postService: PostService) {
+class PostRepository @Inject constructor(private val postService: PostService) {
 
     suspend fun getPosts(token: String): Resource<List<Post>> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {
@@ -66,12 +70,29 @@ class PostRepository(private val postService: PostService) {
         }
     }
 
-    suspend fun updatePost(token: String, post: Post): Resource<Post> = withContext(Dispatchers.IO) {
+    suspend fun updatePost(token: String, post: UpdatePost): Resource<Post> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {
             return@withContext Resource.Error(message = "Un token es requerido")
         }
+
         val bearerToken = "Bearer $token"
-        val response = postService.updatePost(bearerToken, post.id, post)
+
+        val title = post.title.toRequestBody()
+        val description = post.description.toRequestBody()
+
+        val imagePart = post.image?.let { file ->
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("image", file.name, requestFile)
+        }
+
+        val response = postService.updatePost(
+            token = bearerToken,
+            id = post.id,
+            title = title,
+            description = description,
+            image = imagePart
+        )
+
         if (response.isSuccessful) {
             response.body()?.let { postDto ->
                 val updatedPost = postDto.toPost()
@@ -79,15 +100,23 @@ class PostRepository(private val postService: PostService) {
             }
             return@withContext Resource.Error(message = "No se pudo actualizar la publicación")
         }
+
         return@withContext Resource.Error(response.message())
     }
 
-    suspend fun createPost(token: String, post: Post): Resource<Post> = withContext(Dispatchers.IO) {
-        if (token.isBlank()) {
-            return@withContext Resource.Error(message = "Un token es requerido")
-        }
+
+    suspend fun createPost(token: String, post: CreatePost): Resource<Post> = withContext(Dispatchers.IO) {
+        if (token.isBlank()) return@withContext Resource.Error(message = "Un token es requerido")
+
         val bearerToken = "Bearer $token"
-        val response = postService.createPost(bearerToken, post)
+
+        val advisorId = post.advisorId.toString().toRequestBody()
+        val title = post.title.toRequestBody()
+        val description = post.description.toRequestBody()
+        val image = post.image.asRequestBody("image/*".toMediaTypeOrNull())
+        val imagePart = MultipartBody.Part.createFormData("image", post.image.name, image)
+
+        val response = postService.createPost(bearerToken, advisorId, title, description, imagePart)
         if (response.isSuccessful) {
             response.body()?.let { postDto ->
                 val postCreated = postDto.toPost()

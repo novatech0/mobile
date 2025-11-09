@@ -17,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,10 +36,15 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.agrotech.common.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewAppointmentScreen(viewModel: NewAppointmentViewModel, advisorId: Long) {
+fun NewAppointmentScreen(
+    navController: NavController,
+    viewModel: NewAppointmentViewModel,
+    advisorId: Long) {
     val comment = viewModel.comment.value
     val state = viewModel.state.value
     val isExpanded = viewModel.isExpanded.value
@@ -58,7 +64,7 @@ fun NewAppointmentScreen(viewModel: NewAppointmentViewModel, advisorId: Long) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { viewModel.goBack() }
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -102,11 +108,11 @@ fun NewAppointmentScreen(viewModel: NewAppointmentViewModel, advisorId: Long) {
                         onExpandedChange = { viewModel.toggleExpanded() },
                         content = {
                             TextField(
-                                modifier = Modifier.menuAnchor(),
+                                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                                 value = if (selectedDate == -1) {
                                     "Seleccione una fecha"
                                 } else {
-                                    state.data?.let { "${it[selectedDate].availableDate} - ${it[selectedDate].startTime} a ${it[selectedDate].endTime}" }?: "Fecha no disponible"
+                                    state.data?.let { "${it[selectedDate].scheduledDate} - ${it[selectedDate].startTime} a ${it[selectedDate].endTime}" }?: "Fecha no disponible"
                                 },
                                 onValueChange = { /* Do nothing */ },
                                 readOnly = true
@@ -117,7 +123,7 @@ fun NewAppointmentScreen(viewModel: NewAppointmentViewModel, advisorId: Long) {
                             ) {
                                 state.data?.forEachIndexed { index, date ->
                                     DropdownMenuItem(
-                                        text = { Text(text = "${date.availableDate} - ${date.startTime} a ${date.endTime}") },
+                                        text = { Text(text = "${date.scheduledDate} - ${date.startTime} a ${date.endTime}") },
                                         onClick = {
                                             viewModel.setSelectedDate(index)
                                             viewModel.toggleExpanded()
@@ -154,7 +160,9 @@ fun NewAppointmentScreen(viewModel: NewAppointmentViewModel, advisorId: Long) {
                     Button(modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                        onClick = { viewModel.createAppointment(advisorId) },
+                        onClick = { viewModel.createAppointment(onSuccess = {
+                            navController.navigate(Routes.NewAppointmentConfirmation.route)
+                        }) },
                         enabled = selectedDate != -1,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF3E64FF), // Color de fondo del botón

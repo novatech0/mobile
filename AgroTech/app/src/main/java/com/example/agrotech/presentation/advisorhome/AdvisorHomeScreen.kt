@@ -21,15 +21,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.agrotech.R
+import com.example.agrotech.common.Routes
 import com.example.agrotech.presentation.advisorhistory.AppointmentCardAdvisorList
 import com.example.agrotech.presentation.navigationcard.CardItem
 import com.example.agrotech.presentation.navigationcard.NavigationCard
 
 
 @Composable
-fun AdvisorHomeScreen(viewModel: AdvisorHomeViewModel = viewModel()) {
+fun AdvisorHomeScreen(
+    navController: NavController,
+    viewModel: AdvisorHomeViewModel
+) {
     LaunchedEffect(Unit) {
         viewModel.loadData()
         viewModel.getNotificationCount()
@@ -39,21 +43,22 @@ fun AdvisorHomeScreen(viewModel: AdvisorHomeViewModel = viewModel()) {
         CardItem(
             image = painterResource(id = R.drawable.icon_publications_advisor),
             text = "Mis Publicaciones",
-            onClick = { viewModel.goToPosts() }
+            onClick = { navController.navigate(Routes.AdvisorPosts.route) }
         ),
         CardItem(
             image = painterResource(id = R.drawable.icon_appointments),
             text = "Citas",
-            onClick = { viewModel.goToAppointmentsAdvisorList() }
+            onClick = { navController.navigate(Routes.AppointmentsAdvisorList.route) }
         ),
         CardItem(
             image = painterResource(id = R.drawable.icon_available_date),
             text = "Mis horarios",
-            onClick = { viewModel.goToAvailableDates() }
+            onClick = { navController.navigate(Routes.AdvisorAvailableDates.route) }
         )
     )
 
     val appointments = viewModel.appointments
+    val availableDates = viewModel.availableDates
     val advisorId = viewModel.advisorId
     val advisorName = viewModel.advisorName
     val farmerNames = viewModel.farmerNames
@@ -64,7 +69,10 @@ fun AdvisorHomeScreen(viewModel: AdvisorHomeViewModel = viewModel()) {
 
     val upcomingAppointments = appointments
         .filter { it.status == "PENDING" || it.status == "ONGOING" }
-        .sortedBy { it.scheduledDate }
+        .sortedBy { appointment ->
+            val availableDate = viewModel.availableDates.find { it.id == appointment.availableDateId }
+            availableDate?.scheduledDate
+        }
         .take(1)
 
     Column(
@@ -86,7 +94,7 @@ fun AdvisorHomeScreen(viewModel: AdvisorHomeViewModel = viewModel()) {
                 fontSize = 20.sp
             )
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { viewModel.goToNotificationList() }) {
+            IconButton(onClick = { navController.navigate(Routes.NotificationList.route) }) {
                 BadgedBox(
                     badge = {
                         if (viewModel.notificationCount.value > 0) {
@@ -136,7 +144,7 @@ fun AdvisorHomeScreen(viewModel: AdvisorHomeViewModel = viewModel()) {
                         )
                     },
                     onClick = {
-                        viewModel.goToProfile()
+                        navController.navigate(Routes.AdvisorProfile.route)
                         viewModel.setExpanded(false)
                     }
                 )
@@ -150,6 +158,7 @@ fun AdvisorHomeScreen(viewModel: AdvisorHomeViewModel = viewModel()) {
                     onClick = {
                         viewModel.signOut()
                         viewModel.setExpanded(false)
+                        navController.navigate(Routes.Welcome.route) { popUpTo(0) }
                     }
                 )
             }
@@ -184,10 +193,11 @@ fun AdvisorHomeScreen(viewModel: AdvisorHomeViewModel = viewModel()) {
         if (advisorId != null && upcomingAppointments.isNotEmpty()) {
             AppointmentCardAdvisorList(
                 appointments = upcomingAppointments,
+                availableDates = availableDates,
                 farmerNames = farmerNames,
                 farmerImagesUrl = farmerImagesUrl,
                 onAppointmentClick = { appointment ->
-                    viewModel.goToAppointmentDetails(appointment.id)
+                    navController.navigate(Routes.AdvisorAppointmentDetail.route + "/${appointment.id}")
                 }
             )
         } else {

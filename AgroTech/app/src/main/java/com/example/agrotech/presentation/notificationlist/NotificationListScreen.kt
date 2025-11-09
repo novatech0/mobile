@@ -28,9 +28,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 @Composable
-fun NotificationListScreen(viewModel: NotificationListViewModel) {
+fun NotificationListScreen(
+    navController: NavController,
+    viewModel: NotificationListViewModel) {
     val state = viewModel.state.value
 
     LaunchedEffect(Unit) {
@@ -53,7 +56,7 @@ fun NotificationListScreen(viewModel: NotificationListViewModel) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = { viewModel.goBack() }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Go back"

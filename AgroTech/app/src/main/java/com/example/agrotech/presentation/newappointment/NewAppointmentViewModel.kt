@@ -13,12 +13,14 @@ import com.example.agrotech.common.UIState
 import com.example.agrotech.data.repository.appointment.AppointmentRepository
 import com.example.agrotech.data.repository.appointment.AvailableDateRepository
 import com.example.agrotech.data.repository.farmer.FarmerRepository
-import com.example.agrotech.domain.appointment.Appointment
 import com.example.agrotech.domain.appointment.AvailableDate
+import com.example.agrotech.domain.appointment.CreateAppointment
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class NewAppointmentViewModel(private val navController: NavController,
+@HiltViewModel
+class NewAppointmentViewModel @Inject constructor(
                               private val availableDateRepository: AvailableDateRepository,
                               private val appointmentRepository: AppointmentRepository,
                               private val farmerRepository: FarmerRepository
@@ -36,10 +38,6 @@ class NewAppointmentViewModel(private val navController: NavController,
     private val _selectedDate = mutableIntStateOf(-1)
     val selectedDate: State<Int> get() = _selectedDate
 
-    fun goBack() {
-        navController.popBackStack()
-    }
-
     fun getAvailableDates(advisorId: Long) {
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
@@ -56,34 +54,23 @@ class NewAppointmentViewModel(private val navController: NavController,
         }
     }
 
-    fun createAppointment(advisorId: Long) {
+    fun createAppointment(onSuccess: () -> Unit) {
         viewModelScope.launch {
             val farmerResult = farmerRepository.searchFarmerByUserId(GlobalVariables.USER_ID, GlobalVariables.TOKEN)
-            val farmerId = if (farmerResult is Resource.Success) {
-                farmerResult.data?.id ?: 0
-            } else {
-                0
-            }
+            val farmerId = if (farmerResult is Resource.Success) farmerResult.data?.id ?: 0 else 0
             state.value.data?.get(selectedDate.value)?.let { availableDate ->
-                val appointment = Appointment(
-                    id = 0,
-                    advisorId = advisorId,
+                val appointment = CreateAppointment(
+                    availableDateId = availableDate.id,
                     farmerId = farmerId,
                     message = comment.value,
-                    status = "PENDING",
-                    scheduledDate = availableDate.availableDate,
-                    startTime = availableDate.startTime,
-                    endTime = availableDate.endTime,
-                    meetingUrl = ""
                 )
                 _state.value = UIState(isLoading = true)
                     val result = appointmentRepository.createAppointment(GlobalVariables.TOKEN, appointment)
                     if (result is Resource.Success) {
-                        availableDateRepository.deleteAvailableDate(availableDate.id, GlobalVariables.TOKEN)
                         _comment.value = ""
                         _selectedDate.intValue = -1
                         _isExpanded.value = false
-                        navController.navigate(Routes.NewAppointmentConfirmation.route)
+                        onSuccess()
                     } else {
                         _state.value = UIState(message = "Error al crear la cita")
                     }

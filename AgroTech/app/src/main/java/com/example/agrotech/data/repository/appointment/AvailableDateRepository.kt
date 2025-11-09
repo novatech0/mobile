@@ -4,10 +4,29 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.data.remote.appointment.AvailableDateService
 import com.example.agrotech.data.remote.appointment.toAvailableDate
 import com.example.agrotech.domain.appointment.AvailableDate
+import com.example.agrotech.domain.appointment.CreateAvailableDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class AvailableDateRepository(private val availableDateService: AvailableDateService) {
+class AvailableDateRepository @Inject constructor(private val availableDateService: AvailableDateService) {
+    suspend fun getAvailableDateById(availableDateId: Long, token: String): Resource<AvailableDate> = withContext(Dispatchers.IO) {
+        if (token.isBlank()) {
+            return@withContext Resource.Error(message = "Un token es requerido")
+        }
+        val bearerToken = "Bearer $token"
+
+        val response = availableDateService.getAvailableDateById(availableDateId, bearerToken)
+        if (response.isSuccessful) {
+            response.body()?.let { availableDateDto ->
+                val availableDate = availableDateDto.toAvailableDate()
+                return@withContext Resource.Success(availableDate)
+            }
+            return@withContext Resource.Error(message = "Error al obtener la fecha disponible")
+        }
+        return@withContext Resource.Error(response.message())
+    }
+
     suspend fun getAvailableDatesByAdvisor(advisorId: Long, token: String): Resource<List<AvailableDate>> = withContext(
         Dispatchers.IO) {
         if (token.isBlank()) {
@@ -26,7 +45,7 @@ class AvailableDateRepository(private val availableDateService: AvailableDateSer
         return@withContext Resource.Error(response.message())
     }
 
-    suspend fun createAvailableDate(token: String, availableDate: AvailableDate): Resource<AvailableDate> = withContext(Dispatchers.IO) {
+    suspend fun createAvailableDate(token: String, availableDate: CreateAvailableDate): Resource<AvailableDate> = withContext(Dispatchers.IO) {
         if (token.isBlank()) {
             return@withContext Resource.Error(message = "Un token es requerido")
         }

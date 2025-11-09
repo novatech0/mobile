@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.*
@@ -15,16 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.example.agrotech.R
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun FarmerReviewAppointmentScreen(
+    navController: NavController,
     viewModel: FarmerReviewAppointmentViewModel,
     appointmentId: Long
 ) {
@@ -58,7 +60,7 @@ fun FarmerReviewAppointmentScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    IconButton(onClick = { viewModel.goBack() }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Volver"
@@ -67,15 +69,15 @@ fun FarmerReviewAppointmentScreen(
                 }
 
                 if (advisorImage.isNotEmpty()) {
-                    GlideImage(
+                    AsyncImage(
+                        model = advisorImage,
+                        contentDescription = null,
                         modifier = Modifier
                             .size(128.dp)
                             .clip(CircleShape),
-                        imageModel = { advisorImage.ifBlank { R.drawable.placeholder } },
-                        imageOptions = ImageOptions(
-                            contentScale = ContentScale.Crop,
-                            alignment = Alignment.Center
-                        )
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.placeholder)
                     )
                 }
 
@@ -134,12 +136,15 @@ fun FarmerReviewAppointmentScreen(
 
                 // Botón de enviar reseña o actualizar reseña
                 Button(
-                    onClick = { viewModel.submitReview(appointmentId) },
+                    onClick = { viewModel.submitReview(appointmentId,
+                        onSuccess = {
+                            navController.popBackStack()
+                        }) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isSubmitting
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Send,
+                        imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = if (hasReview) "Actualizar reseña" else "Enviar reseña"
                     )
                     Text(text = if (hasReview) "Actualizar Reseña" else "Enviar Reseña")

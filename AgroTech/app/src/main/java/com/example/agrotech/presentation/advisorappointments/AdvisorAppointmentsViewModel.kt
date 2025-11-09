@@ -9,25 +9,33 @@ import com.example.agrotech.common.Resource
 import com.example.agrotech.common.Routes
 import com.example.agrotech.data.repository.advisor.AdvisorRepository
 import com.example.agrotech.data.repository.appointment.AppointmentRepository
+import com.example.agrotech.data.repository.appointment.AvailableDateRepository
 import com.example.agrotech.data.repository.authentication.AuthenticationRepository
 import com.example.agrotech.data.repository.farmer.FarmerRepository
 import com.example.agrotech.data.repository.profile.ProfileRepository
 import com.example.agrotech.domain.appointment.Appointment
+import com.example.agrotech.domain.appointment.AvailableDate
 import com.example.agrotech.domain.authentication.AuthenticationResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AdvisorAppointmentsViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class AdvisorAppointmentsViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
     private val advisorRepository: AdvisorRepository,
     private val appointmentRepository: AppointmentRepository,
+    private val availableDateRepository: AvailableDateRepository,
     private val profileRepository: ProfileRepository,
     private val farmerRepository: FarmerRepository,
 ) : ViewModel() {
 
     var appointments by mutableStateOf<List<Appointment>>(emptyList())
+        private set
+
+    var availableDates by mutableStateOf<List<AvailableDate>>(emptyList())
         private set
 
     var farmerNames by mutableStateOf<Map<Long, String>>(emptyMap())
@@ -57,7 +65,6 @@ class AdvisorAppointmentsViewModel(
         loadAppointmentsCompleted()
     }
 
-
     private fun loadAppointments() {
         viewModelScope.launch {
             if (GlobalVariables.TOKEN.isBlank() || GlobalVariables.USER_ID == 0L) {
@@ -71,7 +78,8 @@ class AdvisorAppointmentsViewModel(
                 if (advisorResult is Resource.Success) {
                     advisorId = advisorResult.data?.id
                     advisorId?.let {
-                        fetchAppointments(it)
+                        fetchAppointments(it, statusFilter = "PENDING")
+                        fetchAvailableDates()
                         fetchFarmerNamesAndImages()
                     }
                 } else {
@@ -98,7 +106,8 @@ class AdvisorAppointmentsViewModel(
                 if (advisorResult is Resource.Success) {
                     advisorId = advisorResult.data?.id
                     advisorId?.let {
-                        fetchAppointmentsCompleted(it)
+                        fetchAppointments(it, statusFilter = "COMPLETED")
+                        fetchAvailableDates()
                         fetchFarmerNamesAndImages()
                     }
                 } else {
@@ -112,28 +121,23 @@ class AdvisorAppointmentsViewModel(
         }
     }
 
-    private suspend fun fetchAppointments(advisorId: Long) {
+    private suspend fun fetchAppointments(advisorId: Long, statusFilter: String) {
         val appointmentsResult = appointmentRepository.getAppointmentsByAdvisor(advisorId, GlobalVariables.TOKEN)
-
         if (appointmentsResult is Resource.Success) {
             val allAppointments = appointmentsResult.data ?: emptyList()
-            appointments = allAppointments.filter { it.status == "PENDING" }
+            appointments = allAppointments.filter { it.status == statusFilter }
         } else {
             errorMessage = appointmentsResult.message
         }
     }
 
-    private suspend fun fetchAppointmentsCompleted(advisorId: Long) {
-        val appointmentsResult = appointmentRepository.getAppointmentsByAdvisor(advisorId, GlobalVariables.TOKEN)
-
-        if (appointmentsResult is Resource.Success) {
-            val allAppointments = appointmentsResult.data ?: emptyList()
-            appointments = allAppointments.filter { it.status == "COMPLETED" }
-        } else {
-            errorMessage = appointmentsResult.message
+    private suspend fun fetchAvailableDates() {
+        val results = appointments.mapNotNull { appointment ->
+            val dateResult = availableDateRepository.getAvailableDateById(appointment.availableDateId, GlobalVariables.TOKEN)
+            (dateResult as? Resource.Success)?.data
         }
+        availableDates = results
     }
-
 
     private suspend fun fetchFarmerNamesAndImages() {
         val farmersNamesMap = mutableMapOf<Long, String>()
@@ -146,13 +150,13 @@ class AdvisorAppointmentsViewModel(
                     if (farmerResult is Resource.Success) {
                         val profileResult = profileRepository.searchProfile(farmerResult.data?.userId ?: 0L, GlobalVariables.TOKEN)
 
-                        val name = if (profileResult is Resource.Success) {
+                        val name = if (profileResult is Resource.Success)
                             "${profileResult.data?.firstName} ${profileResult.data?.lastName}"
-                        } else "Nombre no disponible"
+                        else "Nombre no disponible"
 
-                        val image = if (profileResult is Resource.Success) {
+                        val image = if (profileResult is Resource.Success)
                             profileResult.data?.photo ?: ""
-                        } else ""
+                        else ""
 
                         farmersNamesMap[appointment.id] = name
                         farmersImagesMap[appointment.id] = image
@@ -175,21 +179,7 @@ class AdvisorAppointmentsViewModel(
     fun setExpanded(value: Boolean) {
         _expanded.value = value
     }
-    fun goBack() {
-        navController.popBackStack()
-    }
-    fun goToProfile() {
-        navController.navigate(Routes.AdvisorProfile.route)
-    }
-    fun goToAdvisorAppointmentsHistory(){
-        navController.navigate(Routes.AppointmentsAdvisorHistoryList.route)
-    }
-    private fun goToWelcomeSection() {
-        navController.navigate(Routes.Welcome.route)
-    }
-    fun goToAppointmentDetails(appointmentId: Long) {
-        navController.navigate(Routes.AdvisorAppointmentDetail.route + "/$appointmentId")
-    }
+
     fun signOut() {
         GlobalVariables.ROLES = emptyList()
         viewModelScope.launch {
@@ -199,7 +189,6 @@ class AdvisorAppointmentsViewModel(
                 token = GlobalVariables.TOKEN
             )
             authenticationRepository.deleteUser(authResponse)
-            goToWelcomeSection()
         }
     }
 }

@@ -15,10 +15,12 @@ import com.example.agrotech.data.repository.animal.AnimalRepository
 import com.example.agrotech.data.repository.enclosure.EnclosureRepository
 import com.example.agrotech.domain.animal.Animal
 import com.example.agrotech.domain.enclosure.Enclosure
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AnimalListViewModel(
-    private val navController: NavController,
+@HiltViewModel
+class AnimalListViewModel @Inject constructor(
     private val animalRepository: AnimalRepository,
     private val enclosureRepository: EnclosureRepository
 ): ViewModel() {
@@ -141,24 +143,16 @@ class AnimalListViewModel(
 
     }
 
-    fun goBack() {
-        navController.popBackStack()
-    }
-
-    fun goToAnimalDetails(animalId: Long) {
-        navController.navigate(Routes.AnimalDetail.route + "/$animalId")
-    }
-
     fun setExpanded(value: Boolean) {
         _expanded.value = value
     }
 
-    fun deleteEnclosure(enclosureId: Long) {
+    fun deleteEnclosure(enclosureId: Long, onSuccess: () -> Unit) {
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {
             enclosureRepository.deleteEnclosure(GlobalVariables.TOKEN, enclosureId)
             _expanded.value = false
-            navController.popBackStack()
+            onSuccess()
         }
     }
 
