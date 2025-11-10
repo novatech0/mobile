@@ -1,5 +1,6 @@
 package com.example.agrotech.data.repository.authentication
 
+import com.example.agrotech.common.GlobalVariables
 import com.example.agrotech.common.Resource
 import com.example.agrotech.data.local.UserDao
 import com.example.agrotech.data.local.UserEntity
@@ -39,8 +40,11 @@ class AuthenticationRepository @Inject constructor(private val authenticationSer
         userDao.insert(UserEntity(auth.id, auth.token))
     }
 
-    suspend fun deleteUser(auth: AuthenticationResponse) = withContext(Dispatchers.IO) {
+    suspend fun signOut(auth: AuthenticationResponse) = withContext(Dispatchers.IO) {
         userDao.delete(UserEntity(auth.id, auth.token))
+        GlobalVariables.USER_ID = 0
+        GlobalVariables.TOKEN = ""
+        GlobalVariables.ROLES = emptyList()
     }
 
     suspend fun getUser(): Resource<UserEntity> = withContext(Dispatchers.IO) {

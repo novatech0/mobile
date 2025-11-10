@@ -18,7 +18,7 @@ object DatabaseModule {
     fun provideRoomDatabase(@ApplicationContext appContext: Context): AppDatabase {
         return Room.databaseBuilder(
                 appContext,
-                AppDatabase::class.java, "fitia-db"
+                AppDatabase::class.java, "agrotech-db"
             ).build()
     }
 

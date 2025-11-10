@@ -181,14 +181,13 @@ class AdvisorAppointmentsViewModel @Inject constructor(
     }
 
     fun signOut() {
-        GlobalVariables.ROLES = emptyList()
         viewModelScope.launch {
             val authResponse = AuthenticationResponse(
                 id = GlobalVariables.USER_ID,
                 username = "",
                 token = GlobalVariables.TOKEN
             )
-            authenticationRepository.deleteUser(authResponse)
+            authenticationRepository.signOut(authResponse)
         }
     }
 }

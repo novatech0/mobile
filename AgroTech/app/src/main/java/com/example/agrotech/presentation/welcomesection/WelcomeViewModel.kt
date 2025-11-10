@@ -17,9 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WelcomeViewModel @Inject constructor(
-    private val authenticationRepository: AuthenticationRepository,
-    private val advisorRepository: AdvisorRepository
-) : ViewModel() {
+    private val authenticationRepository: AuthenticationRepository) : ViewModel() {
 
     private val _state = mutableStateOf(UIState<Unit>())
     val state: State<UIState<Unit>> get() = _state
@@ -34,15 +32,12 @@ class WelcomeViewModel @Inject constructor(
                 is Resource.Success -> {
                     GlobalVariables.TOKEN = result.data?.token ?: ""
                     GlobalVariables.USER_ID = result.data?.id ?: 0
-                    if (GlobalVariables.TOKEN.isNotBlank() && GlobalVariables.USER_ID != 0L) {
-                        val isAdvisor = advisorRepository.isUserAdvisor(
-                            GlobalVariables.USER_ID,
-                            GlobalVariables.TOKEN
-                        )
-                        _navigationRoute.value = if (isAdvisor) {
-                            Routes.AdvisorHome.route
-                        } else {
-                            Routes.FarmerHome.route
+                    when {
+                        GlobalVariables.ROLES.contains("ROLE_ADVISOR") -> {
+                            _navigationRoute.value = Routes.AdvisorHome.route
+                        }
+                        GlobalVariables.ROLES.contains("ROLE_FARMER") -> {
+                            _navigationRoute.value = Routes.FarmerHome.route
                         }
                     }
                     _state.value = UIState(isLoading = false)
